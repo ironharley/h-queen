@@ -1,7 +1,7 @@
 \input texinfo   @c -*-texinfo-*-
 @c %**start of header
 @setfilename hqn.info
-@settitle Harlequeen geodata server
+@settitle Harlequeen message server
 @c For double-sided printing, uncomment:
 @c @setchapternewpage odd
 @c Put everything in one index (arbitrarily chosen to be the concept index).
@@ -17,9 +17,9 @@
 @set MAILLIST the Libtool mailing list @email{hqn@@harley.bs}
 
 @copying
-This manual is for Harlequeen geodata server (eq hqn) (version @value{VERSION}, @value{UPDATED}).
+This manual is for Harlequeen message server (eq hqn) (version @value{VERSION}, @value{UPDATED}).
 
-Copyright @copyright{} 2016 Harley Kooper
+Copyright @copyright{} 2020 Harley Kooper
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -58,7 +58,7 @@ the section entitled ``GNU Free Documentation License''.
 
 @ifnottex
 @node Top
-@top Harlequeen geodata server (eq hqn)
+@top Harlequeen message server (eq hqn)
 
 This is document contains all documents about hqn. Only this document can (and has to) be used for settings, tuning and working with one.
 
@@ -68,7 +68,6 @@ This is document contains all documents about hqn. Only this document can (and h
 * Installation:: 	Installation manual.
 * Configuration::   Server configuration
 * Client access:: 	Client access description (IMPORTANT)                       
-* Qlang::    		The QLANG description.
 * Index::           Complete index.
 
 @detailmenu
@@ -76,9 +75,6 @@ This is document contains all documents about hqn. Only this document can (and h
 Introduction
 Technical description
 * Common::  In common.
-* Hub::    		About 'hub'
-* Service::		About 'service'
-* Bind::	About 'bind'.
 
 Installation
 * Requirements::    		What I have to have?
@@ -86,22 +82,6 @@ Installation
 * Properley installation::	How to it wiil installed and works.
 * Postinstall::             What else.
 
-Configuration
-* Core::  Core configuration.
-* Store::  Store configuration.
-* Hubserver::  Receivers configuration
-* Services::	Transmitters configuration
-* Binders::	Binders configuration
-
-Client access
-Qlang
-* Do::     Who is 'do'
-* What::   What is this.
-* When::   What is this.
-* Filter::   What is this.
-* Order::   What is this.
-* Format::  What is this.
-* Params::  What is this.
 Index
 
 @end detailmenu
@@ -114,36 +94,11 @@ Index
 @cindex chapter, first
 
 
-@cindex HQN - open source software for receive GIS
-HQN - open source software for receive GIS (include all navigation, fuel sensors, CAN data and so on) data, temprorary storing and retranslation
-ones to variable destinations. Now hqn can receive next data formats:
-@enumerate
-@item
-wialon-retranslator
-@item
-egts v1.7 (russia)
-@item
-ndtp v1.6
-@end enumerate
+@cindex HQN - open source message broker
+HQN - open source software.
 
-Now hqn can deliver data to:
-@enumerate
-@item
-postgresql database
-@item
-rabbitmq message broker
-@item
-RESTFull service as json stream
-@item
-tcp port as wialon-retranslator stream (egts in plans)
-@end enumerate
-Also you can export data to file.
-
-@b{HQN} doesn't change any received data, hold and retransmitted ones "as is" exclude between protocol/database/(to/from)string transformations. 
-All times inside HQN at UTC, unit's times as received from unit's. In that configuration @b{HQN} requires @copyright{} Postgresql server and @code{libpqxx}.
-
-You can use @b{HQN} as GIS service w/ listed above features, also you can use it as traffic fork service only. In that configuration you have only somethng 
-logs about wet traffic retranslation.
+@b{HQN} doesn't change any received data, hold and retransmitted ones "as is". 
+All times inside HQN at UTC, unit's times as received from unit's.
 
 @c =========================  Technical description ====================================
 @node Technical description
@@ -155,9 +110,6 @@ logs about wet traffic retranslation.
 Technical description here. Main things:
 @menu
 * Common::  In common.
-* Hub::    		About 'hub'
-* Service::		About 'service'
-* Bind::	About 'bind'.
 @end menu
  
 @c -------------  TD Common -------------------------------
@@ -165,25 +117,6 @@ Technical description here. Main things:
 @c ................
 @section Common 
 @cindex Common to Technical description
-
-
-@c -------------  TD Hub -------------------------------
-@node Hub
-@c ................
-@section Hub 
-@cindex Hub to Technical description
-
-@c -------------  TD Service -------------------------------
-@node Service
-@c ................
-@section Service 
-@cindex Service to Technical description
-
-@c -------------  TD Bind -------------------------------
-@node Bind
-@c ................
-@section Bind 
-@cindex Bind to Technical description
 
 @c ======================= Installation ======================================
 @node Installation
@@ -220,126 +153,19 @@ Common:
 	@item
 		automake, 
 	@item
-		cmake (need to build rabbitmq-c, if you've got librabbitmq.a 64-bit then put it to tools/lib64), 
-	@item
 		openssl
+    @item
+        boost 1.72
 	@end enumerate
-@item
-  libtecla (inside, need to build it)
-@item
-  POCO complete edition (@url{http://pocoproject.org/download/index.html})
-  @example
-  ./configure --prefix=/usr --omit=Data/ODBC,Data/MySQL --shared
-  @end example
 @end enumerate
 
 If you want obtain full functional @b{HQN} you need to nave also:
-@enumerate
-@item
-Postgresql server, something up from 9.3
-@item
-GNU libgcrypt
-@item
-Optional. rabbitmq-c (inside, will built by autogen, but it can manually)
-@end enumerate
-Postgresql must be installed locally. If you won't to use Rabbitmq connections you can built @b{HQN} w/o rabbit option.
-
-@b{NOTE}: 
-
-Pre-built supplies includes Postgresql and Rabbbitmq support if other doesn’t pointed package/archive name. 
 
 @c --------------------  Build from src ------------------------
 @node Build from src
 @c ................
 @section Build from src
 @cindex Build from src
-Preffered directory structure (cloned from git must be the same):
-@example
-   BUILD_ROOT  
-             ...
-             .gitmodules
-             ...
-             harlequind          @kbd{- hqn here},
-                        ...
-                        client ->   @kbd{- client sources (and binaries wiil here)}
-                        daemon ->   @kbd{- server sources (and binaries wiil here)}
-                        docs/hqn -> @kbd{- this text}
-                        ...
-             libtecla
-             rabbitmq-c     @kbd{- subrepo, link to clone inside .gitmodules}
-             tools          @kbd{- some prebuilt libraries and headers}
-                  ...
-                  include->  @kbd{headers of prebuilt software }
-                  lib ->     @kbd{some prebuilt 32b-libraries }
-                  lib64 ->   @kbd{some prebuilt 64b-libraries }
-                  ...
-@end example
-BUILD_ROOT has to change to real path. Inside the BUILD_ROOT exists @code{autogen.sh} and  @code{configure} script. You can use last with a special keys:
-@enumerate
-@item
-If you want use full-featured build (@b{with} RabbitMQ)
-@example
-configure ... --enable-postgresql
-@end example
-@item
-If you want use full-featured @b{without} RabbitMQ
-@example
-configure ... --enable-postgresql --disable-rabbitmq
-@end example
-@item
-If you want use "fork-type" build (@b{without both} Postgresql and RabbitMQ)
-@example
-configure ... 
-@end example
-@end enumerate
-Other @code{configure} opthions (@code{--prefix} ant so on) are normal.
-
-Next steps:
-@enumerate
-@item
-Now go to @code{BUILD_ROOT/harlequind} and make it:
-	@example
-	./autogen
-	make && sudo make install
-	@end example
-If you won't use  @code{autogen.sh}, lose this point and go further.
-
-@item
-build && install POCO into /usr by:
-@example
-	cd $POCO
-	./configure --prefix=/usr --omit=Data/MySQL,Data/ODBC --shared
-	./make -j4 && make install
-@end example
-	
-@item
-@command{export PREFIX=BUILD_ROOT/tools} 
-
-@item
-If w/o  @code{autogen.sh } build && install libtecla (cd inside of BUILD_ROOT/libtecla and run):
-@example
-	./configure --prefix=$PREFIX
-	make && make install
-@end example
-	
-@item
-	Install @code{libgcrypt} w/ devel by pkg manager 
-@item
-	If @b{with} Postgresql you need libpqxx by (@command{wget} from @url{http://www.andromeda.nl/UNIX/packages/} 
-	or @url{http://pqxx.org/development/libpqxx/}) manually.	
-	@b{NOTE}: check your Postgresql installation:  @code{/usr/lib/libpq.so/a} has to exists, else do something this:
-	@example
-	sudo ln -s /usr/pgsql-9.5/lib/libpq.so.5 /usr/lib/libpq.so
-	@end example
-	Your installation can hasn't @code{so.5}, but has any another - it doesn't matter. The sames about static (.a) library.
-	
-@item
-If w/o  @code{autogen.sh } now go to @code{BUILD_ROOT/harlequind} and make it:
-	@example
-	make && sudo make install
-	@end example
-
-@end enumerate
 
 
 @c --------------------------------------------
@@ -469,9 +295,6 @@ By default HQN hold configs at @code{/etc/hqn}. Put @code{hqn.xml} here.
 @menu
 * Core::  Core configuration.
 * Store::  Store configuration.
-* Hubserver::  Receivers configuration
-* Services::	Transmitters configuration
-* Binders::	Binders configuration
 @end menu
 
 @c -------------  Configuration Core -------------------------------
@@ -485,26 +308,6 @@ By default HQN hold configs at @code{/etc/hqn}. Put @code{hqn.xml} here.
 @c ................
 @section Store 
 @cindex Store to configuration
-
-@c -------------  Configuration Hubserver -------------------------------
-@node Hubserver
-@c ................
-@section Hubserver 
-@cindex Hubserver to configuration
-
-@c ------------- Configuration Services -------------------------------
-@node Services
-@c ................
-@section Services 
-@cindex Services to configuration
-
-@c -------------  Configuration Binders -------------------------------
-@node Binders
-@c ................
-@section Binders 
-@cindex Binders to configuration
-
-
 
 @c ======================= Client access ======================================
 @node Client access
@@ -520,428 +323,6 @@ If you removed private key's passfrase then reccomended to store new key in sepa
 If you held private key's passfrase then you will asked about one and passfrase @b{will showed at input time}. It isn't bug, it was lazy to fix it and wiil hided in future versions.
 
 
-@c ====================== Qlang =======================================
-@node Qlang
-@c ................
-@chapter Qlang
-@cindex chapter, first
-
-
-Here is about Q[ery]LANG[uage].
-
-Because HQN doesn't claim to analytical podium, QLANG has only reference and control purpose. It isn't language at common mean.  Global pattern is:
-
-@example
-do[
-	.what([params])[
-		.when([params])[
-			.filter([params])[
-				.order([params])[
-					.format([params])
-				]
-			]
-		]
-	]
-];
-@end example
-
-where @kbd{'param'} - string of comma-separated parameters for 'what'. Parameters are positional and nonamed. Types of parameters:
-@itemize @bullet
-@item
-@code{string}: double quated string, for ex @kbd{"what can i do"};
-@item
-@code{integer}: signed/unsigned integer, for ex @kbd{54123};
-@item
-@code{double}: signed/unsigned dot devided float point value, for ex @kbd{-25.674};
-@item
-@code{boolean}: @kbd{true/false} w/o double quates;
-@end itemize
-
-Term @kbd{'do'} - it's command, defined by verb what server has to do. 
-Each @kbd{'do'} has own list of @kbd{'what'}s.
-
-Here and later word 'what' means anything included later @kbd{'do'}. In the project scope the 'what' related not only to first element after @kbd{'do'} but to each. 
-Nevertheless only first of them has name @kbd{what}. In this way all this: what, when, filter, order, format - "what", but only first has name @kbd{'what'}. 
-Each @kbd{'what'} can get parameter string, but some @kbd{'what'}s has to has parameter(s). They're marked as not nulled later. 
-Email for example does not make any sense without value, but json-format under @kbd{selec}t doesn't need any because has got default (utf-8) encoding. 
-
-@menu
-* Do::     (@kbd{'do'}) - what you want to do: set, open, close, select, export etc
-* What::   (@kbd{'what'})- what you need in @kbd{'do'}. It relate to @kbd{'do'}.
-* When::  (@kbd{'when'}) - when you need in @kbd{'do'}. It relate to @kbd{'do'} from @kbd{'what'} at the time mean.
-* Filter:: (@kbd{'filter'}) - filter of data you need in @kbd{'do'}. It relate to @kbd{'do'} from @kbd{'when'} at the object (vehicle for ex) filter mean. 
-* Order::  (@kbd{'order'}) - which order of data you need in @kbd{'do'}. It relate to @kbd{'do'} from @kbd{'filter'} at the object's order mean. 
-* Format:: (@kbd{'format'}) - which format of output you need in @kbd{'do'}. It relate to @kbd{'do'} from @kbd{'order'} at the human readable format mean.
-* Params::  - string of comma-separated parameters for some 'what'.
-@end menu
-
-On the basis of the above the order of operations has to be only this: do->what->when->filter->order->format. 
-You can't change order of things, but can exclude any. Then will used default value: all for when, ascending for order, empty for filter and one-header table format.  
-
-@c --------------------------------------------
-@node Do
-@c ................
-@section Do
-@cindex chapter, first
-Term @kbd{'do'} - it's command, defined by verb what server has to do. Each @kbd{'do'} has own list of @kbd{'what'}s. 
-List of @kbd{'do'}-es with according @kbd{'what'}s:
-@enumerate
-@item @anchor{do-set}
-	@kbd{set} - set session parameters. @xref{what-email,, @kbd{'email'}}.
-@item @anchor{do-account}
-	@kbd{account} - account administration options.  @xref{what-add,, @kbd{'add'}}, @xref{what-rm,, @kbd{'rm'}}, @xref{what-chg,, @kbd{'chg'}}.
-@item @anchor{do-hub}
-	@kbd{hub} - @b{Server admin} feature - hub administration options.  @xref{what-start,, @kbd{'start'}}, @xref{what-stop,, @kbd{'stop'}}, @xref{what-restart,, @kbd{'restart'}}, 
-	@xref{what-snooze,, @kbd{'snooze'}}, @xref{what-kick,, @kbd{'kick'}}, @xref{what-status,, @kbd{'status'}}.
-@item @anchor{do-fork}
-	@kbd{fork} - @b{Server admin} feature - fork administration options.  @xref{what-start,, @kbd{'start'}}, @xref{what-stop,, @kbd{'stop'}}, @xref{what-restart,, @kbd{'restart'}},
-	 @xref{what-snooze,, @kbd{'snooze'}}, @xref{what-kick,, @kbd{'kick'}}, @xref{what-status,, @kbd{'status'}}.
-@item @anchor{do-service}
-	@kbd{service} - @b{Server admin} feature - service administration options.  @xref{what-start,, @kbd{'start'}}, @xref{what-stop,, @kbd{'stop'}}, @xref{what-restart,, @kbd{'restart'}}, 
-	@xref{what-snooze,, @kbd{'snooze'}}, @xref{what-kick,, @kbd{'kick'}}, @xref{what-status,, @kbd{'status'}}.
-@item @anchor{do-bind}
-	@kbd{bind} - @b{Server admin} feature - bind administration options.  @xref{what-start,, @kbd{'start'}}, @xref{what-stop,, @kbd{'stop'}}, @xref{what-restart,, @kbd{'restart'}}, 
-	@xref{what-snooze,, @kbd{'snooze'}}, @xref{what-kick,, @kbd{'kick'}}, @xref{what-status,, @kbd{'status'}}.
-@item @anchor{do-open}
-	@kbd{open} - open resource: remote host or local file (for load content as scenary). @xref{what-host,, @kbd{'host'}},  @xref{what-file,, @kbd{'file'}}.
-@item @anchor{do-list}
-	@kbd{list} - statistical tool, lists of things: vehicles, untransmitted data, emails in account etc.
-@item @anchor{do-close}
-	@kbd{close} - close opened resource(s), still works. No whats.
-@item @anchor{do-exit}
-	@kbd{exit} - close opened resource(s), exit client. No whats.
-@item @anchor{do-select}
-	@kbd{select} - very rough analogue of SQL SELECT operator @xref{what-4select,, whats for it}.
-@item @anchor{do-delete}
-	@kbd{delete} - very rough analogue of SQL DELETE operator @xref{what-4select,, whats for it}, @pxref{what-delid,, @kbd{delid}}. Move data to @code{trash}. Recoverable.
-@item @anchor{do-undo}
-	@kbd{undo} - Recovers data from @code{trash}. NOTE: You MUST remember delete id or put the same operands as according @kbd{delete}.
-@item @anchor{do-purge}
-	@kbd{purge} - Remove all early deleted data - unrecoverable ones. No whats.
-@item @anchor{do-export}
-	@kbd{export} - the same @kbd{select} but output to file/URL.
-@end enumerate
-
-
-@c --------------------------------------------
-@node What
-@c ................
-@section What
-@cindex chapter, first
-Term @kbd{'what'} - it's command extention means what according @kbd{'do'} has to do. Each @kbd{'what'} can get parameter string, but some @kbd{'what'}s 
- has to has parameter. Email for ex. They're marked as not nulled below.
-@enumerate
-@item @anchor{what-email}
-	@kbd{email} - e-mail address of client's certificate wich will connect to server. 
-		@xref{do-set,, @kbd{'set'}}. String parameter. Not null. 
-	@example
-	$ set.email("nobody@@nowhere.net");
-	@end example
-@item @anchor{what-host}
-	@kbd{host} - remote address to connect, @xref{do-open,, @kbd{'open'}}. Parameters:
-	@itemize @bullet
-		@item
-			@code{1st}: ip address/FQDN. String. Not null.
-		@item
-			@code{2nd}: port number. Integer. Default 54123
-	@end itemize
-	
-@example
-	$ open.host("10.2.5.8", 55468);
-	$ open.host("10.2.5.9");
-@end example
-@item @anchor{what-file}
-	@kbd{file} - file wich need for a work. @xref{do-open,, @kbd{'open'}}. String parameter. Not null.
-	@example
-	$ open.file("/tmp/some.file");
-	@end example	
-@item @anchor{what-add}
-	@kbd{add} - add email and link to account. @xref{do-account,, @kbd{'account'}}. String parameter. Not null.	
-	@example
-	$ account.add("nobody@@nowhere.net");
-	@end example	
-@item @anchor{what-rm}
-	@kbd{rm} - remove email and link to account. @xref{do-account,, @kbd{'account'}}. String parameter. Not null.	
-	@example
-	$ account.rm("nobody@@nowhere.net");
-	@end example	
-@item @anchor{what-chg}
-	@kbd{chg} - change email w/ save it link to account. @xref{do-account,, @kbd{'account'}}. Double string parameters. Not null both.	
-	@example
-	$ account.chg("nobody-old@@nowhere.net", "nobody-new@@nowhere.net");
-	@end example	
-@item @anchor{what-delid}
-	@kbd{delid} - delete id for undoing. @xref{do-undo,, @kbd{'undo'}},  @pxref{do-purge,, @kbd{'purge'}}. Integer. Not null.	
-	@example
-	$ delete.traffic()[additional option permits];
-	Ok 123456
-	$ undo.delid(123456);
-	Ok
-	$ delete.traffic()[additional option permits];
-	Ok 123457
-	$purge;
-	Ok
-	$ undo.delid(123457);
-	No such id: 1234567
-	@end example
-	This will delete all traffic data, obtain delete id (123456), undo it, delete another, obtain next delete id (123457), remove this data 
-	forever and try to restore ones unsuccessfully.	
-@end enumerate
-Next three @code{'what'} have equal mean with according @code{'do'}. @xref{do-hub,, @kbd{'hub'}},  @pxref{do-fork,, @kbd{'fork'}},  
-				@pxref{do-service,, @kbd{'service'}},  @pxref{do-bind,, @kbd{'bind'}}. Ones named thing at the list:
-@enumerate
-@item @anchor{what-start}
-	@kbd{start} - start thing if one stopped, nothing else. Will re-read config. For @code{server} starts all of resources according config.
-@item @anchor{what-stop}
-	@kbd{stop} - stop thing if one started, nothing else. Will closed all connections and over and commited all transactions.
-@item @anchor{what-restart}
-	@kbd{restart} - stop and start sequence.
-@item @anchor{what-snooze}
-	@kbd{snooze} - sleep only, do nothing, won't close connections but commit transactions. For short timed database operations. Doesn't re-read config.
-	For @code{bind} it means snoozing of @code{service} as soon as one will transmit all from exists. 
-	For @code{hub} or @code{fork} it means snoozing of chain(s) as soon as one will transmit all from exists.
-@item @anchor{what-kick}
-	@kbd{kick} - wakeup.
-@item @anchor{what-status}
-	@kbd{status} - thing's status 
-@end enumerate
-They're have one integer parameter - id of thing, exclude for @code{server}. -1 value means for all. Restart server:
-@example
-	$ hqn.restart();
-@end example
-Restart service #12:
-@example
-	$ service.restart(12);
-@end example
-Snooze hub #1:
-@example
-	$ hub.snooze(1);
-@end example
-Wake up all binds:
-@example
-	$ bind.kick(-1);
-@end example
-If you want change preferences of thing, you have to change @code{/etc/hqn/hqn.xml} and restart this thing only. Don't need to restart all server. 
-You can't start snoozed thing or kick stopped one. These are have different appointments. 
-
-@xref{do-select,, @kbd{'select'}}.  Only single @code{'what'} from below permitted for one: 
-@anchor{what-4select}
-@enumerate
-@item @anchor{what-full}
-@kbd{full} - all types of data listed below exclude @code{asstr}
-@item @anchor{what-traffic}
-@kbd{traffic} - traffic only ( lat, lon, speed, alt, heading, hdop, vdop, validity, position time etc)
-@item @anchor{what-sensors}
-@kbd{sensors} - any exists sensor's data
-@item @anchor{what-inputs}
-@kbd{inputs} - any exists input's data
-@item @anchor{what-outputs}
-@kbd{outputs} - any exists output's data
-@item @anchor{what-can}
-@kbd{can} - any exists data from CAN bus
-@item @anchor{what-canlog}
-@kbd{canlog} - any exists canlog data 
-@item @anchor{what-events}
-@kbd{events} - events (alarm, moving, parking etc)
-@item @anchor{what-asstr}
-@kbd{asstr} - all data as csv-like string
-@end enumerate
-
-This:
-@example
-	$ select.traffic()[additional option permits];
-@end example	
-will show all @code{traffic}-type data of this client.
-
-This:
-@example
-	$ select.full().yesterday().veh(-1, 2450).asc().json();
-@end example	
-will show as json all data of this client for yesterday, vehicles id less than 2450, ordered ascending. 
-What about @code{yesterday}, @code{veh}, @code{asc} and @code{json}?  @xref{When,, When}. @xref{Filter,, Filter}. @xref{Order,, Order}. @xref{Format,, Format}.  
-
-@xref{do-list,, @kbd{'list'}}. Only single @code{'what'} from below permitted for one: 
-@anchor{what-4list}
-@enumerate
-@item @anchor{what-emails}
-@kbd{emails} - all emails in account
-@item @anchor{what-vehs}
-@kbd{vehs} - all vehicles in account w/ time of last data received
-@item @anchor{what-untr}
-@kbd{untr} - count of untransmitted data group by vehicles, by dates and total
-@item @anchor{what-tr}
-@kbd{tr} - count of transmitted data group by vehicles, by dates and total
-@item @anchor{what-info}
-@kbd{info} - total account info: emails, vehicles, sessions etc
-@end enumerate
-
-This:
-@example
-	$ list.vehs();
-@end example	
-shows all vehicles in account w/ time of last data received.
-
-@c --------------------------------------------
-@node When
-@c ................
-@section When
-@cindex chapter, first
-Term @kbd{'when'} - it's command extention means what time slot according @kbd{'what'} has to do. Each @kbd{'when'} can get parameter string, but some @kbd{'when'}s 
- has to has parameter. They're marked as not nulled below. There're @kbd{'when'}'s according time when data received:
-@enumerate
-@item @anchor{what-all}
-@kbd{all} - All data. No parameters.
-@item @anchor{what-today}
-@kbd{today} - Today received data. All data. No parameters.
-@item @anchor{what-yesterday}
-@kbd{yesterday} - Yesterday received data. All data. No parameters.
-@item @anchor{what-week}
-@kbd{week} - Last week received data. All data. No parameters.
-@item @anchor{what-between}
-@kbd{between} - From date to date (exclude both) received data. Two integer parameters: seconds UTC. Not nulled. 
-				If parameter == -1, it means less than least or great than greatest. See examples below.
-This:
-@example
-	$ select.full().beween(-1, 1474339340);
-@end example	
-shows all vehicles in account w/ received time less than 02:42:20 2016-09-20 UTC (until 02:42:19 inc.).
-@example
-	$ select.full().beween( 1474339340, -1);
-@end example	
-shows all vehicles in account w/ received time great than 02:42:20 2016-09-20 UTC (from 02:42:21 inc.).
-@example
-	$ select.full().beween( 1474332140, 1474339340);
-@end example	
-shows all vehicles in account w/ received time great than 00:42:20 and 02:42:20 2016-09-20 UTC (included from 00:42:21 to 02:42:19).
-
-Zero value instead -1 permits, of course, but HQN use unsigned times and 0 will considered as value and built double sided request ( 0 < x < greatest) 
-whereas -1 built one sided ( x < greatest for ex).
-@end enumerate
-
-For event time (gps timestamp inside @kbd{traffic}) operations add '_u' to end of @kbd{'when'}:
-@enumerate
-@item @anchor{what-all_u}
-@kbd{all_u} - @b{Default}. All data. No parameters.
-@item @anchor{what-todayu}
-@kbd{today_u} - Today events data. All data. No parameters.
-@item @anchor{what-yesterdayu}
-@kbd{yesterday_u} - Yesterday enents data. All data. No parameters.
-@item @anchor{what-week_u}
-@kbd{week_u} - Last week events data. All data. No parameters.
-@item @anchor{what-between_u}
-@kbd{between_u} - From date to date (exclude both) events data. Two integer parameters: seconds at unit timezone. Not nulled. It hasn't to be UTC. 
-				If parameter == -1, it means less than least or great than greatest. See examples above.
-@end enumerate
-
-@c --------------------------------------------
-@node Filter
-@c ................
-@section Filter
-@cindex chapter, first
-Term @kbd{'filter'} - it's command extention means things filter according @kbd{'when'} has to do. Each @kbd{'filter'} can get parameter string, but some @kbd{'filter'}s 
- has to has parameter. They're marked as not nulled below. There're @kbd{'filter'}'s:
-@enumerate
-@item @anchor{filter-all}
-@kbd{all} - @b{Default}. All data. No parameters.
-@item @anchor{filter-valid}
-@kbd{valid} - only valid traffic (LAT/LON w/ validity = parameter, default @b{true}). Nullable
-@example
-	$ select.full().all().valid(false);
-@end example	
-shows all vehicles w/ invalid coordinates.
-@example
-	$ select.full().all().valid();
-@end example	
-shows all vehicles w/ valid coordinates.
-@item @anchor{filter-veh}
-@kbd{veh} - From vehicle id's to vehicle id's (exclude both) data. Two integer parameters, one booloean: vehicle id. 1st and 2nd not nulled. 
-				If parameter == -1, it means less than least or great than greatest. Can has 3rd validity parameter, default @b{true}. See examples below.
-@example
-	$ select.full().all().veh( 119, 251);
-@end example	
-shows vehicles in account with id from 120 to 250 and valid LAT/LON.
-@example
-	$ select.full().all().veh( -1, 251, false);
-@end example	
-shows vehicles in account with id 250 and less and invalid LAT/LON.
-
-Zero value instead -1 permits, of course, but HQN use unsigned ids and 0 will considered as value and built double sided request ( 0 < x < greatest) 
-whereas -1 built one sided ( x < greatest for ex).
-
-@item @anchor{filter-sqz}
-@kbd{sqz} - Vehicles inside/outside squared geozone. Nine parameters. Eight notnullable double: left up LAT, left up LON, right up LAT/LON, right down LAT/LON, left down LAT/LON, 
-and nullable boolean, true (@b{default}) - inside, false - outside.  W and S are negative.
-
-@item @anchor{filter-rndz}
-@kbd{rndz} - Vehicles inside/outside round geozone. Three parameters. Two notnullable double: center LAT, left up LON, size (meters) > 0 
-and nullable boolean, true (@b{default}) - inside, false - outside.  W and S are negative.
-@example
-	$ select.full().all().rndz( 25.045965, -77.375742, 25100, false);
-@end example	
-shows all vehicles outside 25 km and 100 meters from Tonique Williams-darling HWy and Sir Milo Butler Hwy circle, Nassau, Bahamas.
-
-@example
-	$ select.full().all().sqz(25.147931, -77.610242, 25.152660, -77.205678, 24.945919, -77.141456, 24.940872, -77.622238 );
-@end example	
-shows all vehicles inside New Providence island, Bahamas.
-
-@end enumerate
-
-@c --------------------------------------------
-@node Order
-@c ................
-@section Order
-@cindex chapter, first
-Term @kbd{'order'} - it's command extention means things filter according @kbd{'filter'} has to do. There're @kbd{'order'}'s:
-@enumerate
-@item @anchor{order-asc}
-@kbd{asc} - @b{Default}. Ascending by receive time
-@item @anchor{order-asc_u}
-@kbd{asc_u} - Ascending by unit event time
-@item @anchor{order-asc_v}
-@kbd{asc_v} - Ascending by vehicle id
-@item @anchor{order-desc}
-@kbd{desc} - Descending by receive time
-@item @anchor{order-desc_u}
-@kbd{desc_u} - Descending by unit event time
-@item @anchor{order-desc_v}
-@kbd{desc_v} - Descending by vehicle id
-@end enumerate
-
-@example
-	$ select.full().all().veh( -1, 251, false).asc_u();
-@end example	
-shows vehicles in account with id 250 and less and invalid LAT/LON ordered by unit event time asc.
-
-
-@c --------------------------------------------
-@node Format
-@c ................
-@section Format
-@cindex Format
-Term @kbd{'format'} - it's command extention means things filter according @kbd{'order'} has to do. Each can has encoding string parameter, default "utf-8".
-There're @kbd{'format'}'s:
-@enumerate
-
-@item @anchor{format-table}
-@kbd{table} - @b{Default}. One-header table.
-@item @anchor{format-json}
-@kbd{json} - Json
-@item @anchor{format-csv}
-@kbd{csv} - CSV
-
-@end enumerate
-
-@example
-	$ select.full().all().veh( -1, 251, false).asc().json("CP1252");
-@end example	
-
-@c --------------------------------------------
-@node Params
-@c ................
-@section Params
-@cindex Params
-Params
 
 @c =============================================================
 @node Index
