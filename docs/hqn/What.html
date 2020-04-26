@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- This manual is for Harlequeen geodata server (eq hqn) (version 1.0, 31 December 2017).
+
+Copyright (C) 2016 Harley Kooper
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts,
+and with no Back-Cover Texts.  A copy of the license is included in
+the section entitled "GNU Free Documentation License".
+ -->
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>What (Harlequeen geodata server)</title>
+
+<meta name="description" content="What (Harlequeen geodata server)">
+<meta name="keywords" content="What (Harlequeen geodata server)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Index.html" rel="index" title="Index">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Qlang.html" rel="up" title="Qlang">
+<link href="When.html" rel="next" title="When">
+<link href="Do.html" rel="prev" title="Do">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="What"></span><div class="header">
+<p>
+Next: <a href="When.html" accesskey="n" rel="next">When</a>, Previous: <a href="Do.html" accesskey="p" rel="prev">Do</a>, Up: <a href="Qlang.html" accesskey="u" rel="up">Qlang</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="What-1"></span><h3 class="section">6.2 What</h3>
+<span id="index-chapter_002c-first-7"></span>
+<p>Term <kbd>'what'</kbd> - it&rsquo;s command extention means what according <kbd>'do'</kbd> has to do. Each <kbd>'what'</kbd> can get parameter string, but some <kbd>'what'</kbd>s 
+ has to has parameter. Email for ex. They&rsquo;re marked as not nulled below.
+</p><ol>
+<li> <span id="what_002demail"></span><kbd>email</kbd> - e-mail address of client&rsquo;s certificate wich will connect to server. 
+		See <a href="Do.html#do_002dset"><kbd>'set'</kbd></a>. String parameter. Not null. 
+	<div class="example">
+<pre class="example">	$ set.email(&quot;nobody@nowhere.net&quot;);
+	</pre></div>
+</li><li> <span id="what_002dhost"></span><kbd>host</kbd> - remote address to connect, See <a href="Do.html#do_002dopen"><kbd>'open'</kbd></a>. Parameters:
+	<ul>
+<li> <code>1st</code>: ip address/FQDN. String. Not null.
+		</li><li> <code>2nd</code>: port number. Integer. Default 54123
+	</li></ul>
+	
+<div class="example">
+<pre class="example">	$ open.host(&quot;10.2.5.8&quot;, 55468);
+	$ open.host(&quot;10.2.5.9&quot;);
+</pre></div>
+</li><li> <span id="what_002dfile"></span><kbd>file</kbd> - file wich need for a work. See <a href="Do.html#do_002dopen"><kbd>'open'</kbd></a>. String parameter. Not null.
+	<div class="example">
+<pre class="example">	$ open.file(&quot;/tmp/some.file&quot;);
+	</pre></div>
+</li><li> <span id="what_002dadd"></span><kbd>add</kbd> - add email and link to account. See <a href="Do.html#do_002daccount"><kbd>'account'</kbd></a>. String parameter. Not null.	
+	<div class="example">
+<pre class="example">	$ account.add(&quot;nobody@nowhere.net&quot;);
+	</pre></div>
+</li><li> <span id="what_002drm"></span><kbd>rm</kbd> - remove email and link to account. See <a href="Do.html#do_002daccount"><kbd>'account'</kbd></a>. String parameter. Not null.	
+	<div class="example">
+<pre class="example">	$ account.rm(&quot;nobody@nowhere.net&quot;);
+	</pre></div>
+</li><li> <span id="what_002dchg"></span><kbd>chg</kbd> - change email w/ save it link to account. See <a href="Do.html#do_002daccount"><kbd>'account'</kbd></a>. Double string parameters. Not null both.	
+	<div class="example">
+<pre class="example">	$ account.chg(&quot;nobody-old@nowhere.net&quot;, &quot;nobody-new@nowhere.net&quot;);
+	</pre></div>
+</li><li> <span id="what_002ddelid"></span><kbd>delid</kbd> - delete id for undoing. See <a href="Do.html#do_002dundo"><kbd>'undo'</kbd></a>,  see <a href="Do.html#do_002dpurge"><kbd>'purge'</kbd></a>. Integer. Not null.	
+	<div class="example">
+<pre class="example">	$ delete.traffic()[additional option permits];
+	Ok 123456
+	$ undo.delid(123456);
+	Ok
+	$ delete.traffic()[additional option permits];
+	Ok 123457
+	$purge;
+	Ok
+	$ undo.delid(123457);
+	No such id: 1234567
+	</pre></div>
+<p>This will delete all traffic data, obtain delete id (123456), undo it, delete another, obtain next delete id (123457), remove this data 
+	forever and try to restore ones unsuccessfully.	
+</p></li></ol>
+<p>Next three <code>'what'</code> have equal mean with according <code>'do'</code>. See <a href="Do.html#do_002dhub"><kbd>'hub'</kbd></a>,  see <a href="Do.html#do_002dfork"><kbd>'fork'</kbd></a>,  
+				see <a href="Do.html#do_002dservice"><kbd>'service'</kbd></a>,  see <a href="Do.html#do_002dbind"><kbd>'bind'</kbd></a>. Ones named thing at the list:
+</p><ol>
+<li> <span id="what_002dstart"></span><kbd>start</kbd> - start thing if one stopped, nothing else. Will re-read config. For <code>server</code> starts all of resources according config.
+</li><li> <span id="what_002dstop"></span><kbd>stop</kbd> - stop thing if one started, nothing else. Will closed all connections and over and commited all transactions.
+</li><li> <span id="what_002drestart"></span><kbd>restart</kbd> - stop and start sequence.
+</li><li> <span id="what_002dsnooze"></span><kbd>snooze</kbd> - sleep only, do nothing, won&rsquo;t close connections but commit transactions. For short timed database operations. Doesn&rsquo;t re-read config.
+	For <code>bind</code> it means snoozing of <code>service</code> as soon as one will transmit all from exists. 
+	For <code>hub</code> or <code>fork</code> it means snoozing of chain(s) as soon as one will transmit all from exists.
+</li><li> <span id="what_002dkick"></span><kbd>kick</kbd> - wakeup.
+</li><li> <span id="what_002dstatus"></span><kbd>status</kbd> - thing&rsquo;s status 
+</li></ol>
+<p>They&rsquo;re have one integer parameter - id of thing, exclude for <code>server</code>. -1 value means for all. Restart server:
+</p><div class="example">
+<pre class="example">	$ hqn.restart();
+</pre></div>
+<p>Restart service #12:
+</p><div class="example">
+<pre class="example">	$ service.restart(12);
+</pre></div>
+<p>Snooze hub #1:
+</p><div class="example">
+<pre class="example">	$ hub.snooze(1);
+</pre></div>
+<p>Wake up all binds:
+</p><div class="example">
+<pre class="example">	$ bind.kick(-1);
+</pre></div>
+<p>If you want change preferences of thing, you have to change <code>/etc/hqn/hqn.xml</code> and restart this thing only. Don&rsquo;t need to restart all server. 
+You can&rsquo;t start snoozed thing or kick stopped one. These are have different appointments. 
+</p>
+<p>See <a href="Do.html#do_002dselect"><kbd>'select'</kbd></a>.  Only single <code>'what'</code> from below permitted for one: 
+<span id="what_002d4select"></span></p><ol>
+<li> <span id="what_002dfull"></span><kbd>full</kbd> - all types of data listed below exclude <code>asstr</code>
+</li><li> <span id="what_002dtraffic"></span><kbd>traffic</kbd> - traffic only ( lat, lon, speed, alt, heading, hdop, vdop, validity, position time etc)
+</li><li> <span id="what_002dsensors"></span><kbd>sensors</kbd> - any exists sensor&rsquo;s data
+</li><li> <span id="what_002dinputs"></span><kbd>inputs</kbd> - any exists input&rsquo;s data
+</li><li> <span id="what_002doutputs"></span><kbd>outputs</kbd> - any exists output&rsquo;s data
+</li><li> <span id="what_002dcan"></span><kbd>can</kbd> - any exists data from CAN bus
+</li><li> <span id="what_002dcanlog"></span><kbd>canlog</kbd> - any exists canlog data 
+</li><li> <span id="what_002devents"></span><kbd>events</kbd> - events (alarm, moving, parking etc)
+</li><li> <span id="what_002dasstr"></span><kbd>asstr</kbd> - all data as csv-like string
+</li></ol>
+
+<p>This:
+</p><div class="example">
+<pre class="example">	$ select.traffic()[additional option permits];
+</pre></div>
+<p>will show all <code>traffic</code>-type data of this client.
+</p>
+<p>This:
+</p><div class="example">
+<pre class="example">	$ select.full().yesterday().veh(-1, 2450).asc().json();
+</pre></div>
+<p>will show as json all data of this client for yesterday, vehicles id less than 2450, ordered ascending. 
+What about <code>yesterday</code>, <code>veh</code>, <code>asc</code> and <code>json</code>?  See <a href="When.html">When</a>. See <a href="Filter.html">Filter</a>. See <a href="Order.html">Order</a>. See <a href="Format.html">Format</a>.  
+</p>
+<p>See <a href="Do.html#do_002dlist"><kbd>'list'</kbd></a>. Only single <code>'what'</code> from below permitted for one: 
+<span id="what_002d4list"></span></p><ol>
+<li> <span id="what_002demails"></span><kbd>emails</kbd> - all emails in account
+</li><li> <span id="what_002dvehs"></span><kbd>vehs</kbd> - all vehicles in account w/ time of last data received
+</li><li> <span id="what_002duntr"></span><kbd>untr</kbd> - count of untransmitted data group by vehicles, by dates and total
+</li><li> <span id="what_002dtr"></span><kbd>tr</kbd> - count of transmitted data group by vehicles, by dates and total
+</li><li> <span id="what_002dinfo"></span><kbd>info</kbd> - total account info: emails, vehicles, sessions etc
+</li></ol>
+
+<p>This:
+</p><div class="example">
+<pre class="example">	$ list.vehs();
+</pre></div>
+<p>shows all vehicles in account w/ time of last data received.
+</p>
+<hr>
+<div class="header">
+<p>
+Next: <a href="When.html" accesskey="n" rel="next">When</a>, Previous: <a href="Do.html" accesskey="p" rel="prev">Do</a>, Up: <a href="Qlang.html" accesskey="u" rel="up">Qlang</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<!-- This manual is for Harlequeen geodata server (eq hqn) (version 1.0, 31 December 2017).
+
+Copyright (C) 2016 Harley Kooper
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts,
+and with no Back-Cover Texts.  A copy of the license is included in
+the section entitled "GNU Free Documentation License".
+ -->
+<!-- Created by GNU Texinfo 6.7, http://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Filter (Harlequeen geodata server)</title>
+
+<meta name="description" content="Filter (Harlequeen geodata server)">
+<meta name="keywords" content="Filter (Harlequeen geodata server)">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<link href="index.html" rel="start" title="Top">
+<link href="Index.html" rel="index" title="Index">
+<link href="index.html#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="Qlang.html" rel="up" title="Qlang">
+<link href="Order.html" rel="next" title="Order">
+<link href="When.html" rel="prev" title="When">
+<style type="text/css">
+<!--
+a.summary-letter {text-decoration: none}
+blockquote.indentedblock {margin-right: 0em}
+div.display {margin-left: 3.2em}
+div.example {margin-left: 3.2em}
+div.lisp {margin-left: 3.2em}
+kbd {font-style: oblique}
+pre.display {font-family: inherit}
+pre.format {font-family: inherit}
+pre.menu-comment {font-family: serif}
+pre.menu-preformatted {font-family: serif}
+span.nolinebreak {white-space: nowrap}
+span.roman {font-family: initial; font-weight: normal}
+span.sansserif {font-family: sans-serif; font-weight: normal}
+ul.no-bullet {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+<span id="Filter"></span><div class="header">
+<p>
+Next: <a href="Order.html" accesskey="n" rel="next">Order</a>, Previous: <a href="When.html" accesskey="p" rel="prev">When</a>, Up: <a href="Qlang.html" accesskey="u" rel="up">Qlang</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+<hr>
+<span id="Filter-1"></span><h3 class="section">6.4 Filter</h3>
+<span id="index-chapter_002c-first-9"></span>
+<p>Term <kbd>'filter'</kbd> - it&rsquo;s command extention means things filter according <kbd>'when'</kbd> has to do. Each <kbd>'filter'</kbd> can get parameter string, but some <kbd>'filter'</kbd>s 
+ has to has parameter. They&rsquo;re marked as not nulled below. There&rsquo;re <kbd>'filter'</kbd>&rsquo;s:
+</p><ol>
+<li> <span id="filter_002dall"></span><kbd>all</kbd> - <b>Default</b>. All data. No parameters.
+</li><li> <span id="filter_002dvalid"></span><kbd>valid</kbd> - only valid traffic (LAT/LON w/ validity = parameter, default <b>true</b>). Nullable
+<div class="example">
+<pre class="example">	$ select.full().all().valid(false);
+</pre></div>
+<p>shows all vehicles w/ invalid coordinates.
+</p><div class="example">
+<pre class="example">	$ select.full().all().valid();
+</pre></div>
+<p>shows all vehicles w/ valid coordinates.
+</p></li><li> <span id="filter_002dveh"></span><kbd>veh</kbd> - From vehicle id&rsquo;s to vehicle id&rsquo;s (exclude both) data. Two integer parameters, one booloean: vehicle id. 1st and 2nd not nulled. 
+				If parameter == -1, it means less than least or great than greatest. Can has 3rd validity parameter, default <b>true</b>. See examples below.
+<div class="example">
+<pre class="example">	$ select.full().all().veh( 119, 251);
+</pre></div>
+<p>shows vehicles in account with id from 120 to 250 and valid LAT/LON.
+</p><div class="example">
+<pre class="example">	$ select.full().all().veh( -1, 251, false);
+</pre></div>
+<p>shows vehicles in account with id 250 and less and invalid LAT/LON.
+</p>
+<p>Zero value instead -1 permits, of course, but HQN use unsigned ids and 0 will considered as value and built double sided request ( 0 &lt; x &lt; greatest) 
+whereas -1 built one sided ( x &lt; greatest for ex).
+</p>
+</li><li> <span id="filter_002dsqz"></span><kbd>sqz</kbd> - Vehicles inside/outside squared geozone. Nine parameters. Eight notnullable double: left up LAT, left up LON, right up LAT/LON, right down LAT/LON, left down LAT/LON, 
+and nullable boolean, true (<b>default</b>) - inside, false - outside.  W and S are negative.
+
+</li><li> <span id="filter_002drndz"></span><kbd>rndz</kbd> - Vehicles inside/outside round geozone. Three parameters. Two notnullable double: center LAT, left up LON, size (meters) &gt; 0 
+and nullable boolean, true (<b>default</b>) - inside, false - outside.  W and S are negative.
+<div class="example">
+<pre class="example">	$ select.full().all().rndz( 25.045965, -77.375742, 25100, false);
+</pre></div>
+<p>shows all vehicles outside 25 km and 100 meters from Tonique Williams-darling HWy and Sir Milo Butler Hwy circle, Nassau, Bahamas.
+</p>
+<div class="example">
+<pre class="example">	$ select.full().all().sqz(25.147931, -77.610242, 25.152660, -77.205678, 24.945919, -77.141456, 24.940872, -77.622238 );
+</pre></div>
+<p>shows all vehicles inside New Providence island, Bahamas.
+</p>
+</li></ol>
+
+<hr>
+<div class="header">
+<p>
+Next: <a href="Order.html" accesskey="n" rel="next">Order</a>, Previous: <a href="When.html" accesskey="p" rel="prev">When</a>, Up: <a href="Qlang.html" accesskey="u" rel="up">Qlang</a> &nbsp; [<a href="index.html#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="Index.html" title="Index" rel="index">Index</a>]</p>
+</div>
+
+
+
+</body>
+</html>
