@@ -102,7 +102,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_hqn_client_OBJECTS = hqn-client.$(OBJEXT)
 hqn_client_OBJECTS = $(am_hqn_client_OBJECTS)
-hqn_client_LDADD = $(LDADD)
+hqn_client_DEPENDENCIES = ../proto/proto.o
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -262,6 +262,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 hqn_client_SOURCES = hqn-client.cpp
+hqn_client_LDADD = ../proto/proto.o
 all: all-am
 
 .SUFFIXES:

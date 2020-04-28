@@ -36,3 +36,4 @@ daemon/network/Makefile
 daemon/network/tcp/Makefile
 daemon/network/http/Makefile
 daemon/storage/Makefile
+/build/

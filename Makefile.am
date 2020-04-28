@@ -1,2 +1,2 @@
-SUBDIRS = src/tcp-client src/tcp-server docs
+SUBDIRS = src/tcp-client src/tcp-server src/proto docs
 

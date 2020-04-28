@@ -100,9 +100,9 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am_hqn_server_OBJECTS = hqn-server.$(OBJEXT)
+am_hqn_server_OBJECTS = hqn-server.$(OBJEXT) config.$(OBJEXT)
 hqn_server_OBJECTS = $(am_hqn_server_OBJECTS)
-hqn_server_LDADD = $(LDADD)
+hqn_server_DEPENDENCIES = ../proto/proto.o
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -118,7 +118,7 @@ am__v_at_1 =
 DEFAULT_INCLUDES = -I.@am__isrc@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__maybe_remake_depfiles = depfiles
-am__depfiles_remade = ./$(DEPDIR)/hqn-server.Po
+am__depfiles_remade = ./$(DEPDIR)/config.Po ./$(DEPDIR)/hqn-server.Po
 am__mv = mv -f
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -261,7 +261,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-hqn_server_SOURCES = hqn-server.cpp
+hqn_server_SOURCES = hqn-server.cpp config.cpp
+hqn_server_LDADD = ../proto/proto.o
 all: all-am
 
 .SUFFIXES:
@@ -348,6 +349,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config.Po@am__quote@ # am--include-marker
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hqn-server.Po@am__quote@ # am--include-marker
 
 $(am__depfiles_remade):
@@ -499,7 +501,8 @@ clean: clean-am
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
-		-rm -f ./$(DEPDIR)/hqn-server.Po
+		-rm -f ./$(DEPDIR)/config.Po
+	-rm -f ./$(DEPDIR)/hqn-server.Po
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-tags
@@ -545,7 +548,8 @@ install-ps-am:
 installcheck-am:
 
 maintainer-clean: maintainer-clean-am
-		-rm -f ./$(DEPDIR)/hqn-server.Po
+		-rm -f ./$(DEPDIR)/config.Po
+	-rm -f ./$(DEPDIR)/hqn-server.Po
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

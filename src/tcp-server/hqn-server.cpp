@@ -10,157 +10,204 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/random_generator.hpp>
+#include <boost/uuid/name_generator.hpp>
+
+#include "../proto/proto.cpp"
+#include "config.cpp"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 
 class session {
 public:
 
-    session(boost::asio::io_service& io_service, boost::asio::ssl::context& context)
-    : socket_(io_service, context) {
-    }
+	session(boost::asio::io_service &io_service,
+			boost::asio::ssl::context &context) :
+			socket_(io_service, context) {
+	}
 
-    ssl_socket::lowest_layer_type& socket() {
-        return socket_.lowest_layer();
-    }
+	ssl_socket::lowest_layer_type& socket() {
+		return socket_.lowest_layer();
+	}
 
-    void start() {
-        socket_.async_handshake(boost::asio::ssl::stream_base::server,
-                boost::bind(&session::handle_handshake, this,
-                boost::asio::placeholders::error));
-    }
+	void start() {
+		socket_.async_handshake(boost::asio::ssl::stream_base::server,
+				boost::bind(&session::handle_handshake, this,
+						boost::asio::placeholders::error));
+	}
 
-    void handle_handshake(const boost::system::error_code& error) {
-        if (!error) {
-            socket_.async_read_some(boost::asio::buffer(data_, max_length),
-                    boost::bind(&session::handle_read, this,
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred));
-        } else {
-            delete this;
-        }
-    }
+	void handle_handshake(const boost::system::error_code &error) {
+		if (!error) {
+			socket_.async_read_some(boost::asio::buffer(data_, max_length),
+					boost::bind(&session::handle_read, this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred));
+		} else {
+			delete this;
+		}
+	}
 
-    void handle_read(const boost::system::error_code& error,
-            size_t bytes_transferred) {
-        if (!error) {
-            boost::asio::async_write(socket_,
-                    boost::asio::buffer(data_, bytes_transferred),
-                    boost::bind(&session::handle_write, this,
-                    boost::asio::placeholders::error));
-        } else {
-            delete this;
-        }
-    }
+	void handle_read(const boost::system::error_code &error,
+			size_t bytes_transferred) {
+		if (!error) {
+			boost::asio::async_write(socket_,
+					boost::asio::buffer(data_, bytes_transferred),
+					boost::bind(&session::handle_write, this,
+							boost::asio::placeholders::error));
+		} else {
+			delete this;
+		}
+	}
 
-    void handle_write(const boost::system::error_code& error) {
-        if (!error) {
-            socket_.async_read_some(boost::asio::buffer(data_, max_length),
-                    boost::bind(&session::handle_read, this,
-                    boost::asio::placeholders::error,
-                    boost::asio::placeholders::bytes_transferred));
-        } else {
-            delete this;
-        }
-    }
+	void handle_write(const boost::system::error_code &error) {
+		if (!error) {
+			socket_.async_read_some(boost::asio::buffer(data_, max_length),
+					boost::bind(&session::handle_read, this,
+							boost::asio::placeholders::error,
+							boost::asio::placeholders::bytes_transferred));
+		} else {
+			delete this;
+		}
+	}
 
 private:
-    ssl_socket socket_;
+	ssl_socket socket_;
 
-    enum {
-        max_length = 1024
-    };
-    char data_[max_length];
+	enum {
+		max_length = 1024
+	};
+	char data_[max_length];
 };
 
 class server {
 public:
 
-    server(boost::asio::io_service& io_service, unsigned short port)
-    : io_service_(io_service),
-    acceptor_(io_service,
-    boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), port)),
-    context_( boost::asio::ssl::context::tlsv13_server) {
+	server(boost::asio::io_service &io_service, unsigned short port) :
+			io_service_(io_service), acceptor_(io_service,
+					boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),
+							port)), context_(
+					boost::asio::ssl::context::tlsv13_server) {
 
+		/*
+		 std::cout << "name@nobody.net uuid in dns namespace, sha1 version: " << uuid("name@nobody.net") << std::endl;
+		 std::cout << "name2@nobody.net uuid in dns namespace, sha1 version: " << uuid("name2@nobody.net") << std::endl;
+		 std::cout << "name@nobody.net uuid in dns namespace, sha1 version: " << uuid("name@nobody.net") << std::endl;
+		 */
 
+		context_.set_options(
+				boost::asio::ssl::context::default_workarounds
+						| boost::asio::ssl::context::no_sslv2
+						| boost::asio::ssl::context::single_dh_use);
 
-        context_.set_options(
-                boost::asio::ssl::context::default_workarounds
-                | boost::asio::ssl::context::no_sslv2
-                | boost::asio::ssl::context::single_dh_use);
+		//context_.set_password_callback(boost::bind(&server::get_password, this));
 
-        //context_.set_password_callback(boost::bind(&server::get_password, this));
+		context_.use_certificate_chain_file("etc/ssl/device.pem");
+		context_.use_private_key_file("etc/ssl/device.key",
+				boost::asio::ssl::context::pem);
+		context_.use_tmp_dh_file("etc/ssl/dh2048.pem");
 
-        context_.use_certificate_chain_file("etc/ssl/device.pem");
-        context_.use_private_key_file("etc/ssl/device.key", boost::asio::ssl::context::pem);
-        context_.use_tmp_dh_file("etc/ssl/dh2048.pem");
-
-        /**
-         * verify client auth
-         */
+		/**
+		 * verify client auth
+		 */
 		context_.set_verify_callback(
 				boost::bind(&server::client_cert_verification, this, _1, _2));
-        context_.set_verify_mode(boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::context::verify_peer);
-        context_.load_verify_file("etc/ssl/rootCA.pem");
+		context_.set_verify_mode(
+				boost::asio::ssl::context::verify_fail_if_no_peer_cert
+						| boost::asio::ssl::context::verify_peer);
+		context_.load_verify_file("etc/ssl/device.pem");
 
-        session* new_session = new session(io_service_, context_);
-        acceptor_.async_accept(new_session->socket(),
-                boost::bind(&server::handle_accept, this, new_session,
-                boost::asio::placeholders::error));
-    }
-
-    bool client_cert_verification(bool preverified,
-    	      boost::asio::ssl::verify_context& ctx) {
-	    char subject_name[256];
-	    X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
-	    X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-	    std::cout << "Verifying " << subject_name << "\n";
-
-		return true;
+		session *new_session = new session(io_service_, context_);
+		acceptor_.async_accept(new_session->socket(),
+				boost::bind(&server::handle_accept, this, new_session,
+						boost::asio::placeholders::error));
 	}
 
-    std::string get_password() const {
-        return "test";
-    }
+	bool client_cert_verification(bool preverified,
+			boost::asio::ssl::verify_context &ctx) {
+		X509 *cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+		int ver = proto::cert_verify(cert);
+		if (ver == 1) {
+			char subject_name[256];
+			X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
+			// todo identifying client by CN
 
-    void handle_accept(session* new_session,
-            const boost::system::error_code& error) {
-        if (!error) {
-            new_session->start();
-            new_session = new session(io_service_, context_);
-            acceptor_.async_accept(new_session->socket(),
-                    boost::bind(&server::handle_accept, this, new_session,
-                    boost::asio::placeholders::error));
-        } else {
-            delete new_session;
-        }
-    }
+			std::cout << "Verifying " << subject_name << " res "
+					<< std::to_string(ver) << std::endl;
+		}
+		return ver == 1;
+	}
+
+	void handle_accept(session *new_session,
+			const boost::system::error_code &error) {
+		if (!error) {
+			new_session->start();
+			new_session = new session(io_service_, context_);
+			acceptor_.async_accept(new_session->socket(),
+					boost::bind(&server::handle_accept, this, new_session,
+							boost::asio::placeholders::error));
+		} else {
+			delete new_session;
+		}
+	}
 
 private:
-    boost::asio::io_service& io_service_;
-    boost::asio::ip::tcp::acceptor acceptor_;
-    boost::asio::ssl::context context_;
+	boost::uuids::uuid uuid(const char *ns_uuid_) const {
+		boost::uuids::name_generator_sha1 gen(boost::uuids::ns::dns());
+		return gen(ns_uuid_);
+	}
+
+	boost::asio::io_service &io_service_;
+	boost::asio::ip::tcp::acceptor acceptor_;
+	boost::asio::ssl::context context_;
+
 };
 
-int main(int argc, char* argv[]) {
-    try {
-        if (argc != 2) {
-            std::cerr << "Usage: server <port>\n";
-            return 1;
-        }
+int main(int argc, char *argv[]) {
+	int res = 1;
+	try {
+		if (argc != 2) {
+			std::cerr << "Usage: hqn-server --port <port>\n";
+		} else {
 
-        boost::asio::io_service io_service;
+			namespace po = boost::program_options;
+			po::options_description desc("Options");
+			desc.add_options()
+					("port", po::value<std::string>()->default_value("8080"))
+					("help", "")
+					("config", po::value<std::string>()->default_value(	"/etc/harlequeen/harlequeen.cfg"));
 
-        using namespace std; // For atoi.
-        server s(io_service, atoi(argv[1]));
+			po::variables_map vm;
+			po::store(po::parse_command_line(argc, argv, desc), vm);
+			po::notify(vm);
 
-        io_service.run();
-    } catch (std::exception& e) {
-        std::cerr << "Exception: " << e.what() << "\n";
-    }
+			std::cout << "port parsed: "
+					<< boost::any_cast<std::string>(vm["port"].value())
+					<< "\n";
+			std::cout << "help parsed: " << vm.count("help") << "\n";
+			std::cout << "config: "
+					<< boost::any_cast<std::string>(vm["config"].value())
+					<< "\n";
 
-    return 0;
+			boost::asio::io_service io_service;
+
+			using namespace std;
+			hqn_config cfg(boost::any_cast<std::string>(vm["config"].value()));
+			server s(io_service, cfg.port());
+//			server s(io_service, atoi(boost::any_cast<std::string>(vm["port"].value()).c_str()));
+
+			io_service.run();
+			res = 0;
+		}
+	} catch (std::exception &e) {
+		std::cerr << "Exception: " << e.what() << "\n";
+	}
+
+	return res;
 }

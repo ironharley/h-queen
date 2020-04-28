@@ -1,9 +1,9 @@
 This is hqn.info, produced by makeinfo version 6.7 from docs.texi.
 
-This manual is for Harlequeen geodata server (eq hqn) (version 1.0, 31
+This manual is for Harlequeen message server (eq hqn) (version 1.0, 31
 December 2017).
 
-   Copyright (C) 2016 Harley Kooper
+   Copyright (C) 2020 Harley Kooper
 
    Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3 or
@@ -26,7 +26,7 @@ END-INFO-DIR-ENTRY
 
 File: hqn.info,  Node: Top,  Next: Introduction,  Up: (dir)
 
-Harlequeen geodata server (eq hqn)
+Harlequeen message server (eq hqn)
 **********************************
 
 This is document contains all documents about hqn.  Only this document
@@ -39,16 +39,12 @@ can (and has to) be used for settings, tuning and working with one.
 * Installation:: 	Installation manual.
 * Configuration::   Server configuration
 * Client access:: 	Client access description (IMPORTANT)
-* Qlang::    		The QLANG description.
 * Index::           Complete index.
 
 
 Introduction
 Technical description
 * Common::  In common.
-* Hub::    		About 'hub'
-* Service::		About 'service'
-* Bind::	About 'bind'.
 
 Installation
 * Requirements::    		What I have to have?
@@ -56,22 +52,6 @@ Installation
 * Properley installation::	How to it wiil installed and works.
 * Postinstall::             What else.
 
-Configuration
-* Core::  Core configuration.
-* Store::  Store configuration.
-* Hubserver::  Receivers configuration
-* Services::	Transmitters configuration
-* Binders::	Binders configuration
-
-Client access
-Qlang
-* Do::     Who is 'do'
-* What::   What is this.
-* When::   What is this.
-* Filter::   What is this.
-* Order::   What is this.
-* Format::  What is this.
-* Params::  What is this.
 Index
 
 
@@ -81,28 +61,10 @@ File: hqn.info,  Node: Introduction,  Next: Technical description,  Prev: Top,  
 1 Introduction
 **************
 
-HQN - open source software for receive GIS (include all navigation, fuel
-sensors, CAN data and so on) data, temprorary storing and retranslation
-ones to variable destinations.  Now hqn can receive next data formats:
-  1. wialon-retranslator
-  2. egts v1.7 (russia)
-  3. ndtp v1.6
-
-   Now hqn can deliver data to:
-  1. postgresql database
-  2. rabbitmq message broker
-  3. RESTFull service as json stream
-  4. tcp port as wialon-retranslator stream (egts in plans)
-   Also you can export data to file.
+HQN - open source software.
 
    HQN doesn't change any received data, hold and retransmitted ones "as
-is" exclude between protocol/database/(to/from)string transformations.
-All times inside HQN at UTC, unit's times as received from unit's.  In
-that configuration HQN requires (C) Postgresql server and 'libpqxx'.
-
-   You can use HQN as GIS service w/ listed above features, also you can
-use it as traffic fork service only.  In that configuration you have
-only somethng logs about wet traffic retranslation.
+is".  All times inside HQN at UTC, unit's times as received from unit's.
 
 
 File: hqn.info,  Node: Technical description,  Next: Installation,  Prev: Introduction,  Up: Top
@@ -114,33 +76,12 @@ Technical description here.  Main things:
 * Menu:
 
 * Common::  In common.
-* Hub::    		About 'hub'
-* Service::		About 'service'
-* Bind::	About 'bind'.
 
 
-File: hqn.info,  Node: Common,  Next: Hub,  Up: Technical description
+File: hqn.info,  Node: Common,  Up: Technical description
 
 2.1 Common
 ==========
-
-
-File: hqn.info,  Node: Hub,  Next: Service,  Prev: Common,  Up: Technical description
-
-2.2 Hub
-=======
-
-
-File: hqn.info,  Node: Service,  Next: Bind,  Prev: Hub,  Up: Technical description
-
-2.3 Service
-===========
-
-
-File: hqn.info,  Node: Bind,  Prev: Service,  Up: Technical description
-
-2.4 Bind
-========
 
 
 File: hqn.info,  Node: Installation,  Next: Configuration,  Prev: Technical description,  Up: Top
@@ -169,94 +110,16 @@ File: hqn.info,  Node: Requirements,  Next: Build from src,  Up: Installation
        1. gcc/g++ && libs,
        2. libtools,
        3. automake,
-       4. cmake (need to build rabbitmq-c, if you've got librabbitmq.a
-          64-bit then put it to tools/lib64),
-       5. openssl
-  2. libtecla (inside, need to build it)
-  3. POCO complete edition
-     (<http://pocoproject.org/download/index.html>)
-            ./configure --prefix=/usr --omit=Data/ODBC,Data/MySQL --shared
+       4. openssl
+       5. boost 1.72
 
    If you want obtain full functional HQN you need to nave also:
-  1. Postgresql server, something up from 9.3
-  2. GNU libgcrypt
-  3. Optional.  rabbitmq-c (inside, will built by autogen, but it can
-     manually)
-   Postgresql must be installed locally.  If you won't to use Rabbitmq
-connections you can built HQN w/o rabbit option.
-
-   NOTE:
-
-   Pre-built supplies includes Postgresql and Rabbbitmq support if other
-doesn’t pointed package/archive name.
 
 
 File: hqn.info,  Node: Build from src,  Next: Properley installation,  Prev: Requirements,  Up: Installation
 
 3.2 Build from src
 ==================
-
-Preffered directory structure (cloned from git must be the same):
-        BUILD_ROOT
-                  ...
-                  .gitmodules
-                  ...
-                  harlequind          - hqn here,
-                             ...
-                             client ->   - client sources (and binaries wiil here)
-                             daemon ->   - server sources (and binaries wiil here)
-                             docs/hqn -> - this text
-                             ...
-                  libtecla
-                  rabbitmq-c     - subrepo, link to clone inside .gitmodules
-                  tools          - some prebuilt libraries and headers
-                       ...
-                       include->  headers of prebuilt software
-                       lib ->     some prebuilt 32b-libraries
-                       lib64 ->   some prebuilt 64b-libraries
-                       ...
-   BUILD_ROOT has to change to real path.  Inside the BUILD_ROOT exists
-'autogen.sh' and 'configure' script.  You can use last with a special
-keys:
-  1. If you want use full-featured build (with RabbitMQ)
-          configure ... --enable-postgresql
-  2. If you want use full-featured without RabbitMQ
-          configure ... --enable-postgresql --disable-rabbitmq
-  3. If you want use "fork-type" build (without both Postgresql and
-     RabbitMQ)
-          configure ...
-   Other 'configure' opthions ('--prefix' ant so on) are normal.
-
-   Next steps:
-  1. Now go to 'BUILD_ROOT/harlequind' and make it:
-          	./autogen
-          	make && sudo make install
-     If you won't use 'autogen.sh', lose this point and go further.
-
-  2. build && install POCO into /usr by:
-          	cd $POCO
-          	./configure --prefix=/usr --omit=Data/MySQL,Data/ODBC --shared
-          	./make -j4 && make install
-
-  3. 'export PREFIX=BUILD_ROOT/tools'
-
-  4. If w/o 'autogen.sh ' build && install libtecla (cd inside of
-     BUILD_ROOT/libtecla and run):
-          	./configure --prefix=$PREFIX
-          	make && make install
-
-  5. Install 'libgcrypt' w/ devel by pkg manager
-  6. If with Postgresql you need libpqxx by ('wget' from
-     <http://www.andromeda.nl/UNIX/packages/> or
-     <http://pqxx.org/development/libpqxx/>) manually.	 NOTE: check your
-     Postgresql installation: '/usr/lib/libpq.so/a' has to exists, else
-     do something this:
-          	sudo ln -s /usr/pgsql-9.5/lib/libpq.so.5 /usr/lib/libpq.so
-     Your installation can hasn't 'so.5', but has any another - it
-     doesn't matter.  The sames about static (.a) library.
-
-  7. If w/o 'autogen.sh ' now go to 'BUILD_ROOT/harlequind' and make it:
-          	make && sudo make install
 
 
 File: hqn.info,  Node: Properley installation,  Next: Postinstall,  Prev: Build from src,  Up: Installation
@@ -341,9 +204,6 @@ By default HQN hold configs at '/etc/hqn'.  Put 'hqn.xml' here.
 
 * Core::  Core configuration.
 * Store::  Store configuration.
-* Hubserver::  Receivers configuration
-* Services::	Transmitters configuration
-* Binders::	Binders configuration
 
 
 File: hqn.info,  Node: Core,  Next: Store,  Up: Configuration
@@ -352,31 +212,13 @@ File: hqn.info,  Node: Core,  Next: Store,  Up: Configuration
 ========
 
 
-File: hqn.info,  Node: Store,  Next: Hubserver,  Prev: Core,  Up: Configuration
+File: hqn.info,  Node: Store,  Prev: Core,  Up: Configuration
 
 4.2 Store
 =========
 
 
-File: hqn.info,  Node: Hubserver,  Next: Services,  Prev: Store,  Up: Configuration
-
-4.3 Hubserver
-=============
-
-
-File: hqn.info,  Node: Services,  Next: Binders,  Prev: Hubserver,  Up: Configuration
-
-4.4 Services
-============
-
-
-File: hqn.info,  Node: Binders,  Prev: Services,  Up: Configuration
-
-4.5 Binders
-===========
-
-
-File: hqn.info,  Node: Client access,  Next: Qlang,  Prev: Configuration,  Up: Top
+File: hqn.info,  Node: Client access,  Next: Index,  Prev: Configuration,  Up: Top
 
 5 Client access
 ***************
@@ -399,362 +241,7 @@ passfrase will showed at input time.  It isn't bug, it was lazy to fix
 it and wiil hided in future versions.
 
 
-File: hqn.info,  Node: Qlang,  Next: Index,  Prev: Client access,  Up: Top
-
-6 Qlang
-*******
-
-Here is about Q[ery]LANG[uage].
-
-   Because HQN doesn't claim to analytical podium, QLANG has only
-reference and control purpose.  It isn't language at common mean.
-Global pattern is:
-
-     do[
-     	.what([params])[
-     		.when([params])[
-     			.filter([params])[
-     				.order([params])[
-     					.format([params])
-     				]
-     			]
-     		]
-     	]
-     ];
-
-   where ''param'' - string of comma-separated parameters for 'what'.
-Parameters are positional and nonamed.  Types of parameters:
-   * 'string': double quated string, for ex '"what can i do"';
-   * 'integer': signed/unsigned integer, for ex '54123';
-   * 'double': signed/unsigned dot devided float point value, for ex
-     '-25.674';
-   * 'boolean': 'true/false' w/o double quates;
-
-   Term ''do'' - it's command, defined by verb what server has to do.
-Each ''do'' has own list of ''what''s.
-
-   Here and later word 'what' means anything included later ''do''.  In
-the project scope the 'what' related not only to first element after
-''do'' but to each.  Nevertheless only first of them has name 'what'.
-In this way all this: what, when, filter, order, format - "what", but
-only first has name ''what''.  Each ''what'' can get parameter string,
-but some ''what''s has to has parameter(s).  They're marked as not
-nulled later.  Email for example does not make any sense without value,
-but json-format under 'selec't doesn't need any because has got default
-(utf-8) encoding.
-
-* Menu:
-
-* Do::     (''do'') - what you want to do: set, open, close, select, export etc
-* What::   (''what'')- what you need in ''do''. It relate to ''do''.
-* When::  (''when'') - when you need in ''do''. It relate to ''do'' from ''what'' at the time mean.
-* Filter:: (''filter'') - filter of data you need in ''do''. It relate to ''do'' from ''when'' at the object (vehicle for ex) filter mean.
-* Order::  (''order'') - which order of data you need in ''do''. It relate to ''do'' from ''filter'' at the object's order mean.
-* Format:: (''format'') - which format of output you need in ''do''. It relate to ''do'' from ''order'' at the human readable format mean.
-* Params::  - string of comma-separated parameters for some 'what'.
-
-   On the basis of the above the order of operations has to be only
-this: do->what->when->filter->order->format.  You can't change order of
-things, but can exclude any.  Then will used default value: all for
-when, ascending for order, empty for filter and one-header table format.
-
-
-File: hqn.info,  Node: Do,  Next: What,  Up: Qlang
-
-6.1 Do
-======
-
-Term ''do'' - it's command, defined by verb what server has to do.  Each
-''do'' has own list of ''what''s.  List of ''do''-es with according
-''what''s:
-  1. 'set' - set session parameters.  *Note ''email'': what-email.
-  2. 'account' - account administration options.  *Note ''add'':
-     what-add, *Note ''rm'': what-rm, *Note ''chg'': what-chg.
-  3. 'hub' - Server admin feature - hub administration options.  *Note
-     ''start'': what-start, *Note ''stop'': what-stop, *Note
-     ''restart'': what-restart, *Note ''snooze'': what-snooze, *Note
-     ''kick'': what-kick, *Note ''status'': what-status.
-  4. 'fork' - Server admin feature - fork administration options.  *Note
-     ''start'': what-start, *Note ''stop'': what-stop, *Note
-     ''restart'': what-restart, *Note ''snooze'': what-snooze, *Note
-     ''kick'': what-kick, *Note ''status'': what-status.
-  5. 'service' - Server admin feature - service administration options.
-     *Note ''start'': what-start, *Note ''stop'': what-stop, *Note
-     ''restart'': what-restart, *Note ''snooze'': what-snooze, *Note
-     ''kick'': what-kick, *Note ''status'': what-status.
-  6. 'bind' - Server admin feature - bind administration options.  *Note
-     ''start'': what-start, *Note ''stop'': what-stop, *Note
-     ''restart'': what-restart, *Note ''snooze'': what-snooze, *Note
-     ''kick'': what-kick, *Note ''status'': what-status.
-  7. 'open' - open resource: remote host or local file (for load content
-     as scenary).  *Note ''host'': what-host, *Note ''file'': what-file.
-  8. 'list' - statistical tool, lists of things: vehicles, untransmitted
-     data, emails in account etc.
-  9. 'close' - close opened resource(s), still works.  No whats.
-  10. 'exit' - close opened resource(s), exit client.  No whats.
-  11. 'select' - very rough analogue of SQL SELECT operator *Note whats
-     for it: what-4select.
-  12. 'delete' - very rough analogue of SQL DELETE operator *Note whats
-     for it: what-4select, *note 'delid': what-delid.  Move data to
-     'trash'.  Recoverable.
-  13. 'undo' - Recovers data from 'trash'.  NOTE: You MUST remember
-     delete id or put the same operands as according 'delete'.
-  14. 'purge' - Remove all early deleted data - unrecoverable ones.  No
-     whats.
-  15. 'export' - the same 'select' but output to file/URL.
-
-
-File: hqn.info,  Node: What,  Next: When,  Prev: Do,  Up: Qlang
-
-6.2 What
-========
-
-Term ''what'' - it's command extention means what according ''do'' has
-to do.  Each ''what'' can get parameter string, but some ''what''s has
-to has parameter.  Email for ex.  They're marked as not nulled below.
-  1. 'email' - e-mail address of client's certificate wich will connect
-     to server.  *Note ''set'': do-set.  String parameter.  Not null.
-          	$ set.email("nobody@nowhere.net");
-  2. 'host' - remote address to connect, *Note ''open'': do-open.
-     Parameters:
-        * '1st': ip address/FQDN. String.  Not null.
-        * '2nd': port number.  Integer.  Default 54123
-
-          	$ open.host("10.2.5.8", 55468);
-          	$ open.host("10.2.5.9");
-  3. 'file' - file wich need for a work.  *Note ''open'': do-open.
-     String parameter.  Not null.
-          	$ open.file("/tmp/some.file");
-  4. 'add' - add email and link to account.  *Note ''account'':
-     do-account.  String parameter.  Not null.
-          	$ account.add("nobody@nowhere.net");
-  5. 'rm' - remove email and link to account.  *Note ''account'':
-     do-account.  String parameter.  Not null.
-          	$ account.rm("nobody@nowhere.net");
-  6. 'chg' - change email w/ save it link to account.  *Note
-     ''account'': do-account.  Double string parameters.  Not null both.
-          	$ account.chg("nobody-old@nowhere.net", "nobody-new@nowhere.net");
-  7. 'delid' - delete id for undoing.  *Note ''undo'': do-undo, *note
-     ''purge'': do-purge.  Integer.  Not null.
-          	$ delete.traffic()[additional option permits];
-          	Ok 123456
-          	$ undo.delid(123456);
-          	Ok
-          	$ delete.traffic()[additional option permits];
-          	Ok 123457
-          	$purge;
-          	Ok
-          	$ undo.delid(123457);
-          	No such id: 1234567
-     This will delete all traffic data, obtain delete id (123456), undo
-     it, delete another, obtain next delete id (123457), remove this
-     data forever and try to restore ones unsuccessfully.
-   Next three ''what'' have equal mean with according ''do''.  *Note
-''hub'': do-hub, *note ''fork'': do-fork, *note ''service'': do-service,
-*note ''bind'': do-bind.  Ones named thing at the list:
-  1. 'start' - start thing if one stopped, nothing else.  Will re-read
-     config.  For 'server' starts all of resources according config.
-  2. 'stop' - stop thing if one started, nothing else.  Will closed all
-     connections and over and commited all transactions.
-  3. 'restart' - stop and start sequence.
-  4. 'snooze' - sleep only, do nothing, won't close connections but
-     commit transactions.  For short timed database operations.  Doesn't
-     re-read config. 	For 'bind' it means snoozing of 'service' as soon
-     as one will transmit all from exists.  For 'hub' or 'fork' it means
-     snoozing of chain(s) as soon as one will transmit all from exists.
-  5. 'kick' - wakeup.
-  6. 'status' - thing's status
-   They're have one integer parameter - id of thing, exclude for
-'server'.  -1 value means for all.  Restart server:
-     	$ hqn.restart();
-   Restart service #12:
-     	$ service.restart(12);
-   Snooze hub #1:
-     	$ hub.snooze(1);
-   Wake up all binds:
-     	$ bind.kick(-1);
-   If you want change preferences of thing, you have to change
-'/etc/hqn/hqn.xml' and restart this thing only.  Don't need to restart
-all server.  You can't start snoozed thing or kick stopped one.  These
-are have different appointments.
-
-   *Note ''select'': do-select.  Only single ''what'' from below
-permitted for one:
-  1. 'full' - all types of data listed below exclude 'asstr'
-  2. 'traffic' - traffic only ( lat, lon, speed, alt, heading, hdop,
-     vdop, validity, position time etc)
-  3. 'sensors' - any exists sensor's data
-  4. 'inputs' - any exists input's data
-  5. 'outputs' - any exists output's data
-  6. 'can' - any exists data from CAN bus
-  7. 'canlog' - any exists canlog data
-  8. 'events' - events (alarm, moving, parking etc)
-  9. 'asstr' - all data as csv-like string
-
-   This:
-     	$ select.traffic()[additional option permits];
-   will show all 'traffic'-type data of this client.
-
-   This:
-     	$ select.full().yesterday().veh(-1, 2450).asc().json();
-   will show as json all data of this client for yesterday, vehicles id
-less than 2450, ordered ascending.  What about 'yesterday', 'veh', 'asc'
-and 'json'?  *Note When: When.  *Note Filter: Filter.  *Note Order:
-Order.  *Note Format: Format.
-
-   *Note ''list'': do-list.  Only single ''what'' from below permitted
-for one:
-  1. 'emails' - all emails in account
-  2. 'vehs' - all vehicles in account w/ time of last data received
-  3. 'untr' - count of untransmitted data group by vehicles, by dates
-     and total
-  4. 'tr' - count of transmitted data group by vehicles, by dates and
-     total
-  5. 'info' - total account info: emails, vehicles, sessions etc
-
-   This:
-     	$ list.vehs();
-   shows all vehicles in account w/ time of last data received.
-
-
-File: hqn.info,  Node: When,  Next: Filter,  Prev: What,  Up: Qlang
-
-6.3 When
-========
-
-Term ''when'' - it's command extention means what time slot according
-''what'' has to do.  Each ''when'' can get parameter string, but some
-''when''s has to has parameter.  They're marked as not nulled below.
-There're ''when'''s according time when data received:
-  1. 'all' - All data.  No parameters.
-  2. 'today' - Today received data.  All data.  No parameters.
-  3. 'yesterday' - Yesterday received data.  All data.  No parameters.
-  4. 'week' - Last week received data.  All data.  No parameters.
-  5. 'between' - From date to date (exclude both) received data.  Two
-     integer parameters: seconds UTC. Not nulled.  If parameter == -1,
-     it means less than least or great than greatest.  See examples
-     below.  This:
-          	$ select.full().beween(-1, 1474339340);
-     shows all vehicles in account w/ received time less than 02:42:20
-     2016-09-20 UTC (until 02:42:19 inc.).
-          	$ select.full().beween( 1474339340, -1);
-     shows all vehicles in account w/ received time great than 02:42:20
-     2016-09-20 UTC (from 02:42:21 inc.).
-          	$ select.full().beween( 1474332140, 1474339340);
-     shows all vehicles in account w/ received time great than 00:42:20
-     and 02:42:20 2016-09-20 UTC (included from 00:42:21 to 02:42:19).
-
-     Zero value instead -1 permits, of course, but HQN use unsigned
-     times and 0 will considered as value and built double sided request
-     ( 0 < x < greatest) whereas -1 built one sided ( x < greatest for
-     ex).
-
-   For event time (gps timestamp inside 'traffic') operations add '_u'
-to end of ''when'':
-  1. 'all_u' - Default.  All data.  No parameters.
-  2. 'today_u' - Today events data.  All data.  No parameters.
-  3. 'yesterday_u' - Yesterday enents data.  All data.  No parameters.
-  4. 'week_u' - Last week events data.  All data.  No parameters.
-  5. 'between_u' - From date to date (exclude both) events data.  Two
-     integer parameters: seconds at unit timezone.  Not nulled.  It
-     hasn't to be UTC. If parameter == -1, it means less than least or
-     great than greatest.  See examples above.
-
-
-File: hqn.info,  Node: Filter,  Next: Order,  Prev: When,  Up: Qlang
-
-6.4 Filter
-==========
-
-Term ''filter'' - it's command extention means things filter according
-''when'' has to do.  Each ''filter'' can get parameter string, but some
-''filter''s has to has parameter.  They're marked as not nulled below.
-There're ''filter'''s:
-  1. 'all' - Default.  All data.  No parameters.
-  2. 'valid' - only valid traffic (LAT/LON w/ validity = parameter,
-     default true).  Nullable
-          	$ select.full().all().valid(false);
-     shows all vehicles w/ invalid coordinates.
-          	$ select.full().all().valid();
-     shows all vehicles w/ valid coordinates.
-  3. 'veh' - From vehicle id's to vehicle id's (exclude both) data.  Two
-     integer parameters, one booloean: vehicle id.  1st and 2nd not
-     nulled.  If parameter == -1, it means less than least or great than
-     greatest.  Can has 3rd validity parameter, default true.  See
-     examples below.
-          	$ select.full().all().veh( 119, 251);
-     shows vehicles in account with id from 120 to 250 and valid
-     LAT/LON.
-          	$ select.full().all().veh( -1, 251, false);
-     shows vehicles in account with id 250 and less and invalid LAT/LON.
-
-     Zero value instead -1 permits, of course, but HQN use unsigned ids
-     and 0 will considered as value and built double sided request ( 0 <
-     x < greatest) whereas -1 built one sided ( x < greatest for ex).
-
-  4. 'sqz' - Vehicles inside/outside squared geozone.  Nine parameters.
-     Eight notnullable double: left up LAT, left up LON, right up
-     LAT/LON, right down LAT/LON, left down LAT/LON, and nullable
-     boolean, true (default) - inside, false - outside.  W and S are
-     negative.
-
-  5. 'rndz' - Vehicles inside/outside round geozone.  Three parameters.
-     Two notnullable double: center LAT, left up LON, size (meters) > 0
-     and nullable boolean, true (default) - inside, false - outside.  W
-     and S are negative.
-          	$ select.full().all().rndz( 25.045965, -77.375742, 25100, false);
-     shows all vehicles outside 25 km and 100 meters from Tonique
-     Williams-darling HWy and Sir Milo Butler Hwy circle, Nassau,
-     Bahamas.
-
-          	$ select.full().all().sqz(25.147931, -77.610242, 25.152660, -77.205678, 24.945919, -77.141456, 24.940872, -77.622238 );
-     shows all vehicles inside New Providence island, Bahamas.
-
-
-File: hqn.info,  Node: Order,  Next: Format,  Prev: Filter,  Up: Qlang
-
-6.5 Order
-=========
-
-Term ''order'' - it's command extention means things filter according
-''filter'' has to do.  There're ''order'''s:
-  1. 'asc' - Default.  Ascending by receive time
-  2. 'asc_u' - Ascending by unit event time
-  3. 'asc_v' - Ascending by vehicle id
-  4. 'desc' - Descending by receive time
-  5. 'desc_u' - Descending by unit event time
-  6. 'desc_v' - Descending by vehicle id
-
-     	$ select.full().all().veh( -1, 251, false).asc_u();
-   shows vehicles in account with id 250 and less and invalid LAT/LON
-ordered by unit event time asc.
-
-
-File: hqn.info,  Node: Format,  Next: Params,  Prev: Order,  Up: Qlang
-
-6.6 Format
-==========
-
-Term ''format'' - it's command extention means things filter according
-''order'' has to do.  Each can has encoding string parameter, default
-"utf-8".  There're ''format'''s:
-
-  1. 'table' - Default.  One-header table.
-  2. 'json' - Json
-  3. 'csv' - CSV
-
-     	$ select.full().all().veh( -1, 251, false).asc().json("CP1252");
-
-
-File: hqn.info,  Node: Params,  Prev: Format,  Up: Qlang
-
-6.7 Params
-==========
-
-Params
-
-
-File: hqn.info,  Node: Index,  Prev: Qlang,  Up: Top
+File: hqn.info,  Node: Index,  Prev: Client access,  Up: Top
 
 Index
 *****
@@ -762,33 +249,19 @@ Index
  [index ]
 * Menu:
 
-* Bind to Technical description:         Bind.                  (line 5)
-* Binders to configuration:              Binders.               (line 5)
-* Build from src:                        Build from src.        (line 6)
+* Build from src:                        Build from src.        (line 5)
 * chapter, first:                        Introduction.          (line 6)
 * chapter, first <1>:                    Technical description. (line 6)
 * chapter, first <2>:                    Installation.          (line 6)
 * chapter, first <3>:                    Configuration.         (line 6)
 * chapter, first <4>:                    Client access.         (line 6)
-* chapter, first <5>:                    Qlang.                 (line 6)
-* chapter, first <6>:                    Do.                    (line 6)
-* chapter, first <7>:                    What.                  (line 6)
-* chapter, first <8>:                    When.                  (line 6)
-* chapter, first <9>:                    Filter.                (line 6)
-* chapter, first <10>:                   Order.                 (line 6)
 * Common to Technical description:       Common.                (line 5)
 * Core to configuration:                 Core.                  (line 5)
-* Format:                                Format.                (line 6)
-* HQN - open source software for receive GIS: Introduction.     (line 6)
-* Hub to Technical description:          Hub.                   (line 5)
-* Hubserver to configuration:            Hubserver.             (line 5)
-* Params:                                Params.                (line 6)
+* HQN - open source message broker:      Introduction.          (line 6)
 * Postinstall:                           Postinstall.           (line 6)
 * Properley installation:                Properley installation.
                                                                 (line 6)
 * Requirements to install:               Requirements.          (line 6)
-* Service to Technical description:      Service.               (line 5)
-* Services to configuration:             Services.              (line 5)
 * Store to configuration:                Store.                 (line 5)
 * Technical description of HQN - open source software for receive GIS: Technical description.
                                                                 (line 6)
@@ -797,101 +270,19 @@ Index
 
 Tag Table:
 Node: Top903
-Node: Introduction2263
-Node: Technical description3367
-Node: Common3668
-Node: Hub3764
-Node: Service3870
-Node: Bind3982
-Node: Installation4076
-Node: Requirements4617
-Node: Build from src5626
-Node: Properley installation8437
-Node: Postinstall8652
-Node: Configuration11709
-Node: Core12085
-Node: Store12169
-Node: Hubserver12273
-Node: Services12389
-Node: Binders12505
-Node: Client access12601
-Node: Qlang13812
-Node: Do16370
-Ref: do-set16596
-Ref: do-account16663
-Ref: do-hub16791
-Ref: do-fork17049
-Ref: do-service17309
-Ref: do-bind17574
-Ref: do-open17834
-Ref: do-list17980
-Ref: do-close18087
-Ref: do-exit18153
-Ref: do-select18218
-Ref: do-delete18317
-Ref: do-undo18485
-Ref: do-purge18616
-Ref: do-export18700
-Node: What18754
-Ref: what-email19057
-Ref: what-host19245
-Ref: what-file19516
-Ref: what-add19659
-Ref: what-rm19818
-Ref: what-chg19978
-Ref: what-delid20190
-Ref: what-start21006
-Ref: what-stop21146
-Ref: what-restart21275
-Ref: what-snooze21317
-Ref: what-kick21675
-Ref: what-status21697
-Ref: what-4select22324
-Ref: what-full22330
-Ref: what-traffic22391
-Ref: what-sensors22500
-Ref: what-inputs22542
-Ref: what-outputs22582
-Ref: what-can22624
-Ref: what-canlog22666
-Ref: what-events22705
-Ref: what-asstr22757
-Ref: what-4list23306
-Ref: what-emails23312
-Ref: what-vehs23350
-Ref: what-untr23418
-Ref: what-tr23503
-Ref: what-info23584
-Node: When23740
-Ref: what-all24099
-Ref: what-today24138
-Ref: what-yesterday24201
-Ref: what-week24272
-Ref: what-between24338
-Ref: what-all_u25415
-Ref: what-todayu25466
-Ref: what-yesterdayu25529
-Ref: what-week_u25600
-Ref: what-between_u25666
-Node: Filter25918
-Ref: filter-all26255
-Ref: filter-valid26304
-Ref: filter-veh26585
-Ref: filter-sqz27360
-Ref: filter-rndz27649
-Node: Order28304
-Ref: order-asc28519
-Ref: order-asc_u28568
-Ref: order-asc_v28612
-Ref: order-desc28651
-Ref: order-desc_u28692
-Ref: order-desc_v28738
-Node: Format28936
-Ref: format-table29213
-Ref: format-json29256
-Ref: format-csv29275
-Node: Params29360
-Node: Index29451
+Node: Introduction1760
+Node: Technical description2058
+Node: Common2282
+Node: Installation2366
+Node: Requirements2907
+Node: Build from src3231
+Node: Properley installation3382
+Node: Postinstall3597
+Node: Configuration6654
+Node: Core6917
+Node: Store7001
+Node: Client access7087
+Node: Index8298
 
 End Tag Table
 

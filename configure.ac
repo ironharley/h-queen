@@ -96,8 +96,15 @@ AC_CHECK_HEADER([netinet/in.h], [])
 AC_CHECK_HEADER([sys/socket.h], [])
 
 AC_LANG_PUSH([C++])
-AC_CHECK_HEADER([boost/asio.hpp], [], [AC_MSG_ERROR(You need the Boost libraries.)])
-AC_CHECK_HEADER([boost/bind.hpp], [], [AC_MSG_ERROR(You need the Boost libraries.)])
+AC_CHECK_HEADER([boost/asio.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/bind.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/uuid/uuid.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/property_tree/ptree.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+
+AC_CHECK_HEADER([openssl/pem.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
+AC_CHECK_HEADER([openssl/x509.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
+AC_CHECK_HEADER([openssl/x509v3.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
 AC_LANG_POP([C++])
  
 
@@ -107,6 +114,7 @@ LIBS="-L/usr/local/lib -L/usr/lib  -L/usr/lib64 \
     -lpthread \
     -lboost_thread \
     -lboost_system \
+    -lboost_program_options \    
     ${LIBS} "
 
 
@@ -115,5 +123,6 @@ AC_CONFIG_FILES([
  Makefile
  src/tcp-client/Makefile
  src/tcp-server/Makefile
+
 ])
 AC_OUTPUT
