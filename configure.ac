@@ -1,4 +1,4 @@
-AC_INIT([hqn-server hqn-client], [1.0])
+AC_INIT([hqn], [1.0])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
 AC_PROG_CXX
 AC_CANONICAL_HOST
@@ -62,7 +62,7 @@ ARCH_CPPFLAGS="-DHQMQ_OSTYPE_${OSTYPE_UPPER} -DHQMQ_ARCH_${ARCH_UPPER} -DHQMQ_LA
 
 AC_C_BIGENDIAN([AC_DEFINE_UNQUOTED(RESIP_BIG_ENDIAN, , RESIP_BIG_ENDIAN)])
 
-CXXFLAGS="${ARCH_CPPFLAGS} ${CXXFLAGS} -std=c++14 -g -O3 -Wall -Wno-deprecated -Wnonnull -Wuninitialized -fpermissive  "
+CXXFLAGS="${ARCH_CPPFLAGS} ${CXXFLAGS} -std=c++14 -DBOOST_LOG_DYN_LINK -g -O3 -Wall -Wno-deprecated -Wnonnull -Wuninitialized -fpermissive "
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -101,6 +101,9 @@ AC_CHECK_HEADER([boost/bind.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([boost/uuid/uuid.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([boost/property_tree/ptree.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/log/trivial.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/log/utility/setup.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
+AC_CHECK_HEADER([boost/log/expressions.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 
 AC_CHECK_HEADER([openssl/pem.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
 AC_CHECK_HEADER([openssl/x509.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
@@ -115,6 +118,15 @@ LIBS="-L/usr/local/lib -L/usr/lib  -L/usr/lib64 \
     -lboost_thread \
     -lboost_system \
     -lboost_program_options \    
+    -lboost_log \
+    -lboost_log_setup \
+    -lboost_chrono \
+    -lboost_atomic \
+    -lboost_date_time \
+    -lboost_filesystem \
+    -lboost_iostreams \
+    -lboost_timer \
+    -lboost_context \
     ${LIBS} "
 
 

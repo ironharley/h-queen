@@ -24,6 +24,8 @@
 #include "config.cpp"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
+namespace hqn {
+namespace server {
 
 class session {
 public:
@@ -132,7 +134,7 @@ public:
 	bool client_cert_verification(bool preverified,
 			boost::asio::ssl::verify_context &ctx) {
 		X509 *cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
-		int ver = proto::cert_verify(cert);
+		int ver = hqn::proto::proto::cert_verify(cert);
 		if (ver == 1) {
 			char subject_name[256];
 			X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
@@ -168,39 +170,49 @@ private:
 	boost::asio::ssl::context context_;
 
 };
+}
+}
 
 int main(int argc, char *argv[]) {
+	const char *HELP_SCREEN =
+			"hqn-server [--config=/etc/harlequeen/harlequeen.cfg | --version | --help]";
 	int res = 1;
 	try {
-		if (argc != 2) {
-			std::cerr << "Usage: hqn-server --port <port>\n";
+		hqn::config::init_log();
+
+		namespace po = boost::program_options;
+		po::options_description desc("Options");
+		desc.add_options()("help", "")("version", "")("config",
+				po::value<std::string>()->default_value(
+						"/etc/harlequeen/harlequeen.cfg"));
+
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+
+		if (vm.count("help") == 1) {
+			std::cout << HELP_SCREEN << std::endl;
+
+		} else if (vm.count("version") == 1) {
+			std::cout << PACKAGE_STRING << std::endl;
+
 		} else {
+			std::string conf_file = "/etc/harlequeen/harlequeen.cfg";
+			if (vm.count("config") > 0) {
+				conf_file =
+						boost::any_cast<std::string>(vm["config"].value()).c_str();
+			}
 
-			namespace po = boost::program_options;
-			po::options_description desc("Options");
-			desc.add_options()
-					("port", po::value<std::string>()->default_value("8080"))
-					("help", "")
-					("config", po::value<std::string>()->default_value(	"/etc/harlequeen/harlequeen.cfg"));
-
-			po::variables_map vm;
-			po::store(po::parse_command_line(argc, argv, desc), vm);
-			po::notify(vm);
-
-			std::cout << "port parsed: "
-					<< boost::any_cast<std::string>(vm["port"].value())
-					<< "\n";
-			std::cout << "help parsed: " << vm.count("help") << "\n";
-			std::cout << "config: "
-					<< boost::any_cast<std::string>(vm["config"].value())
-					<< "\n";
+			BOOST_LOG_TRIVIAL(info)
+			<< "help parsed: " << vm.count("help");
+			BOOST_LOG_TRIVIAL(info)
+			<< "config: " << conf_file.c_str();
 
 			boost::asio::io_service io_service;
 
 			using namespace std;
-			hqn_config cfg(boost::any_cast<std::string>(vm["config"].value()));
-			server s(io_service, cfg.port());
-//			server s(io_service, atoi(boost::any_cast<std::string>(vm["port"].value()).c_str()));
+			hqn::config::config cfg(conf_file);
+			hqn::server::server s(io_service, cfg.port());
 
 			io_service.run();
 			res = 0;

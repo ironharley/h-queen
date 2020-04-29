@@ -8,6 +8,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
+namespace hqn { namespace proto {
 class proto {
 public:
 	/**
@@ -97,4 +98,4 @@ private:
 		return cert;
 	}
 };
-
+}}

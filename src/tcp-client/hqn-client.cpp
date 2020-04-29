@@ -13,11 +13,15 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+
 #include "../proto/proto.cpp"
 
 enum {
 	max_length = 1024
 };
+
+namespace hqn {
+namespace client {
 
 class client {
 public:
@@ -144,7 +148,7 @@ private:
 		X509 *cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
 		X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
 		X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
-		int ver = proto::cert_verify(cert);
+		int ver = hqn::proto::proto::cert_verify(cert);
 		if (ver == -1) {
 			std::cout << "NOT Verified " << std::endl;
 		} else {
@@ -154,14 +158,15 @@ private:
 	}
 
 };
-
+}
+}
 int main(int argc, char *argv[]) {
 	try {
 		if (argc != 3) {
 			std::cerr << "Usage: client <host> <port>\n";
 			return 1;
 		}
-		wrap w(argv);
+		hqn::client::wrap w(argv);
 	} catch (boost::system::error_code &e) {
 		std::cerr << "Exception: " << e.message() << "\n";
 	}
