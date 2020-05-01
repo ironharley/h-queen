@@ -39,3 +39,4 @@ daemon/storage/Makefile
 /build/
 /.cproject
 /.project
+/Makefile.in
