@@ -26,7 +26,7 @@ solaris*)
 freebsd*)
   OSTYPE=FreeBSD
   ;;
-linux*)
+Linux*)
   OSTYPE=Linux
   ;;
 darwin*)
@@ -63,39 +63,6 @@ ARCH_CPPFLAGS="-DHQMQ_OSTYPE_${OSTYPE_UPPER} -DHQMQ_ARCH_${ARCH_UPPER} -DHQMQ_LA
 #AC_C_BIGENDIAN([AC_DEFINE_UNQUOTED(RESIP_BIG_ENDIAN, , RESIP_BIG_ENDIAN)])
 
 CXXFLAGS="-g -O3 -std=c++14 ${ARCH_CPPFLAGS} -DBOOST_LOG_DYN_LINK -Wall -Wno-deprecated -Wnonnull -Wuninitialized -Wunused-function -fpermissive "
-
-# boost unit test suite 
-#AX_BOOST_UNIT_TEST_FRAMEWORK
-# Checks for typedefs, structures, and compiler characteristics.
-#AC_CHECK_HEADER_STDBOOL
-#AC_TYPE_PID_T
-#AC_TYPE_UINT16_T
-#AC_TYPE_UINT32_T
-#AC_TYPE_UINT64_T
-#AC_TYPE_UINT8_T
-#AC_TYPE_OFF_T
-#AC_TYPE_SSIZE_T
-#AC_TYPE_SIZE_T
-#AC_TYPE_UINT64_T
-#AC_TYPE_INT16_T
-#AC_TYPE_INT32_T
-#AC_TYPE_INT64_T
-#AC_TYPE_INT8_T
-
-#AC_CHECK_FUNCS([bzero])
-#AC_CHECK_FUNCS([memset])
-#AC_CHECK_FUNCS([strerror])
-#AC_CHECK_FUNCS([socket])
-#AC_CHECK_FUNCS([gethostname])
-#AC_CHECK_FUNCS([atexit])
-#AC_CHECK_HEADER([fcntl.h], [])
-#AC_CHECK_HEADER([stdlib.h], [])
-#AC_CHECK_HEADER([unistd.h], [])
-#AC_CHECK_HEADER([stddef.h], [])
-#AC_CHECK_HEADER([arpa/inet.h], [])
-#AC_CHECK_HEADER([netdb.h], [])
-#AC_CHECK_HEADER([netinet/in.h], [])
-#AC_CHECK_HEADER([sys/socket.h], [])
 
 AC_LANG_PUSH([C++])
 AC_CHECK_HEADER([boost/asio.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
