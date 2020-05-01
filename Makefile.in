@@ -300,7 +300,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = src/tcp-client src/tcp-server src/proto docs
+SUBDIRS = src/tcp-client src/tcp-server docs tests
 all: all-recursive
 
 .SUFFIXES:

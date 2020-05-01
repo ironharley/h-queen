@@ -102,7 +102,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_hqn_server_OBJECTS = hqn-server.$(OBJEXT) config.$(OBJEXT)
 hqn_server_OBJECTS = $(am_hqn_server_OBJECTS)
-hqn_server_DEPENDENCIES = ../proto/proto.o
+hqn_server_LDADD = $(LDADD)
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
 am__v_P_0 = false
@@ -262,7 +262,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 hqn_server_SOURCES = hqn-server.cpp config.cpp
-hqn_server_LDADD = ../proto/proto.o
 all: all-am
 
 .SUFFIXES:
@@ -585,6 +584,7 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
+#hqn_server_LDADD = ../proto/proto.o
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

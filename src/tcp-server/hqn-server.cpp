@@ -15,12 +15,8 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/name_generator.hpp>
 
-#include "../proto/proto.cpp"
+#include "../proto/proto.hpp"
 #include "config.cpp"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
@@ -160,10 +156,6 @@ public:
 	}
 
 private:
-	boost::uuids::uuid uuid(const char *ns_uuid_) const {
-		boost::uuids::name_generator_sha1 gen(boost::uuids::ns::dns());
-		return gen(ns_uuid_);
-	}
 
 	boost::asio::io_service &io_service_;
 	boost::asio::ip::tcp::acceptor acceptor_;
@@ -174,8 +166,12 @@ private:
 }
 
 int main(int argc, char *argv[]) {
+/*
+	const char *COPYRIGHT =
+			"(c)HarleQueen craftsmans @ worldwide and handmade. Since 2020";
 	const char *HELP_SCREEN =
 			"hqn-server [--config=/etc/harlequeen/harlequeen.cfg | --version | --help]";
+*/
 	int res = 1;
 	try {
 		hqn::config::init_log();
@@ -191,10 +187,10 @@ int main(int argc, char *argv[]) {
 		po::notify(vm);
 
 		if (vm.count("help") == 1) {
-			std::cout << HELP_SCREEN << std::endl;
+			hqn::proto::show_help_server();
 
 		} else if (vm.count("version") == 1) {
-			std::cout << PACKAGE_STRING << std::endl;
+			hqn::proto::show_version();
 
 		} else {
 			std::string conf_file = "/etc/harlequeen/harlequeen.cfg";

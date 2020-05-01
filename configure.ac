@@ -62,8 +62,10 @@ ARCH_CPPFLAGS="-DHQMQ_OSTYPE_${OSTYPE_UPPER} -DHQMQ_ARCH_${ARCH_UPPER} -DHQMQ_LA
 
 AC_C_BIGENDIAN([AC_DEFINE_UNQUOTED(RESIP_BIG_ENDIAN, , RESIP_BIG_ENDIAN)])
 
-CXXFLAGS="${ARCH_CPPFLAGS} ${CXXFLAGS} -std=c++14 -DBOOST_LOG_DYN_LINK -g -O3 -Wall -Wno-deprecated -Wnonnull -Wuninitialized -fpermissive "
+CXXFLAGS="-g -O3 -std=c++14 ${ARCH_CPPFLAGS} -DBOOST_LOG_DYN_LINK -Wall -Wno-deprecated -Wnonnull -Wuninitialized -Wunused-function -fpermissive "
 
+# boost unit test suite 
+AX_BOOST_UNIT_TEST_FRAMEWORK
 # Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
 AC_TYPE_PID_T
@@ -135,6 +137,6 @@ AC_CONFIG_FILES([
  Makefile
  src/tcp-client/Makefile
  src/tcp-server/Makefile
-
+ tests/Makefile
 ])
 AC_OUTPUT

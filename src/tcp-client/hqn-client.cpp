@@ -14,7 +14,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 
-#include "../proto/proto.cpp"
+#include "../proto/proto.hpp"
 
 enum {
 	max_length = 1024
