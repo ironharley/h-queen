@@ -17,7 +17,7 @@
 #include <boost/asio/ssl.hpp>
 
 #include "../proto/proto.hpp"
-#include "config.cpp"
+#include "config.hpp"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 namespace hqn {

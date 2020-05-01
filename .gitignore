@@ -28,14 +28,6 @@ ltmain.sh
 libtool
 stamp-h1
 Makefile
-client/Makefile
-daemon/Makefile
-daemon/configuration/Makefile
-daemon/amqp/Makefile
-daemon/network/Makefile
-daemon/network/tcp/Makefile
-daemon/network/http/Makefile
-daemon/storage/Makefile
 /build/
 /.cproject
 /.project

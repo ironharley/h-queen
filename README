@@ -4,26 +4,3 @@ autoheader
 automake --force-missing --add-missing
 autoconf
 ./configure
-
-HQN proto spec
-
-json
-
-
-
-
-Type           Subtype
--------------  --------------
-0 - handshake  0
-1 - bye        0
-2 - msg        0 - n/a
-               1 - message
-               2 - command
-3 - list       0 - n/a
-               1 - messages
-               2 - receipts
-4 - subscr     0 - n/a
-               1 - make
-               2 - remove
-               3 - unsubscribe               
-               
