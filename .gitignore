@@ -34,3 +34,4 @@ Makefile
 /.cproject
 /.project
 /Makefile.in
+/config.guess
