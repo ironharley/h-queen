@@ -7,12 +7,9 @@
 
 #ifndef SRC_PROTO_PROTO_HPP_
 #define SRC_PROTO_PROTO_HPP_
-#include <sys/types.h>
 
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
-#include <vector>
+#include "constants.hpp"
+
 #include <openssl/pem.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
@@ -32,7 +29,7 @@ static const char *COPYRIGHT =
 
 static const char *HELP_SERVER_SCREEN =
 		"hqn-server [--config=/etc/harlequeen/harlequeen.cfg | --version | --help]";
-static const char *HELP_CLIENT_SCREEN = "hqn-client [--version | --help]";
+static const char *HELP_CLI_SCREEN = "hqn-cli [--version | --help]";
 
 static uint64_t timestamp_now() {
 	boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
@@ -46,19 +43,17 @@ static boost::uuids::uuid uuid(const char *ns_uuid_) {
 	return gen(ns_uuid_);
 }
 
-static void show_help_server() {
+static void show_help(bool server) {
 	std::cout << hqn::proto::COPYRIGHT << std::endl;
-	std::cout << hqn::proto::HELP_SERVER_SCREEN << std::endl;
+	if (server)
+		std::cout << hqn::proto::HELP_SERVER_SCREEN << std::endl;
+	else
+		std::cout << hqn::proto::HELP_CLI_SCREEN << std::endl;
 }
 
 static void show_version() {
 	std::cout << hqn::proto::COPYRIGHT << std::endl;
 	std::cout << PACKAGE_STRING << std::endl;
-}
-
-static void show_help_client() {
-	std::cout << hqn::proto::COPYRIGHT << std::endl;
-	std::cout << hqn::proto::HELP_CLIENT_SCREEN << std::endl;
 }
 
 enum receipt_code : uint8_t {

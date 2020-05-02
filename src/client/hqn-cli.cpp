@@ -13,6 +13,8 @@
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+#include <boost/program_options.hpp>
+#include <boost/program_options/options_description.hpp>
 
 #include "../proto/proto.hpp"
 
@@ -108,11 +110,11 @@ private:
 
 class wrap {
 public:
-	wrap(char *argv[]) {
+	wrap(const char *host, const char *port) {
 		boost::asio::io_service io_service;
 
 		boost::asio::ip::tcp::resolver resolver(io_service);
-		boost::asio::ip::tcp::resolver::query query(argv[1], argv[2]);
+		boost::asio::ip::tcp::resolver::query query(host, port);
 		boost::asio::ip::tcp::resolver::iterator iterator = resolver.resolve(
 				query);
 
@@ -162,11 +164,27 @@ private:
 }
 int main(int argc, char *argv[]) {
 	try {
-		if (argc != 3) {
-			std::cerr << "Usage: client <host> <port>\n";
-			return 1;
+		namespace po = boost::program_options;
+		po::options_description desc("Options");
+		desc.add_options()("help", "")("version", "")("host",
+				po::value<std::string>()->default_value("localhost"))("port",
+				po::value<std::string>()->default_value(std::to_string(hqn::config::defaults::server_port)));
+
+		po::variables_map vm;
+		po::store(po::parse_command_line(argc, argv, desc), vm);
+		po::notify(vm);
+
+		if (vm.count("help") > 0) {
+			hqn::proto::show_help(false);
+
+		} else if (vm.count("version") > 0) {
+			hqn::proto::show_version();
+
+		} else {
+			hqn::client::wrap w(
+					boost::any_cast<std::string>(vm["host"].value()).c_str(),
+					boost::any_cast<std::string>(vm["port"].value()).c_str());
 		}
-		hqn::client::wrap w(argv);
 	} catch (boost::system::error_code &e) {
 		std::cerr << "Exception: " << e.message() << "\n";
 	}

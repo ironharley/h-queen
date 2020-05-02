@@ -102,8 +102,8 @@ LIBS="-L/usr/local/lib -L/usr/lib  -L/usr/lib64 \
 CXXFLAGS=" ${CXXFLAGS} -I/usr/include -I/usr/local/include -I/home/hkooper/local/include "
 AC_CONFIG_FILES([
  Makefile
- src/tcp-client/Makefile
- src/tcp-server/Makefile
+ src/client/Makefile
+ src/server/Makefile
  tests/Makefile
 ])
 AC_OUTPUT

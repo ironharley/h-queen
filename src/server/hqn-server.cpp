@@ -17,7 +17,7 @@
 #include <boost/asio/ssl.hpp>
 
 #include "../proto/proto.hpp"
-#include "config.hpp"
+#include "../server/config.hpp"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 namespace hqn {
@@ -166,12 +166,6 @@ private:
 }
 
 int main(int argc, char *argv[]) {
-/*
-	const char *COPYRIGHT =
-			"(c)HarleQueen craftsmans @ worldwide and handmade. Since 2020";
-	const char *HELP_SCREEN =
-			"hqn-server [--config=/etc/harlequeen/harlequeen.cfg | --version | --help]";
-*/
 	int res = 1;
 	try {
 		hqn::config::init_log();
@@ -186,10 +180,10 @@ int main(int argc, char *argv[]) {
 		po::store(po::parse_command_line(argc, argv, desc), vm);
 		po::notify(vm);
 
-		if (vm.count("help") == 1) {
-			hqn::proto::show_help_server();
+		if (vm.count("help") > 0) {
+			hqn::proto::show_help(true);
 
-		} else if (vm.count("version") == 1) {
+		} else if (vm.count("version") > 0) {
 			hqn::proto::show_version();
 
 		} else {
@@ -199,19 +193,19 @@ int main(int argc, char *argv[]) {
 						boost::any_cast<std::string>(vm["config"].value()).c_str();
 			}
 
-			BOOST_LOG_TRIVIAL(info)
-			<< "help parsed: " << vm.count("help");
-			BOOST_LOG_TRIVIAL(info)
-			<< "config: " << conf_file.c_str();
-
 			boost::asio::io_service io_service;
 
 			using namespace std;
 			hqn::config::config cfg(conf_file);
-			hqn::server::server s(io_service, cfg.port());
+			if (cfg.valid()) {
+				BOOST_LOG_TRIVIAL(info)
+				<< "config: " << conf_file.c_str();
 
-			io_service.run();
-			res = 0;
+				hqn::server::server s(io_service, cfg.port());
+
+				io_service.run();
+				res = 0;
+			}
 		}
 	} catch (std::exception &e) {
 		std::cerr << "Exception: " << e.what() << "\n";
