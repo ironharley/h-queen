@@ -24,6 +24,12 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
+#include <boost/archive/iterators/base64_from_binary.hpp>
+#include <boost/archive/iterators/insert_linebreaks.hpp>
+#include <boost/archive/iterators/transform_width.hpp>
+#include <boost/archive/iterators/ostream_iterator.hpp>
+#include <sstream>
+
 namespace hqn {
 namespace proto {
 static const char *COPYRIGHT =
@@ -60,7 +66,7 @@ static void show_version() {
 
 static std::string clean_json(std::stringstream &ss) {
 	std::regex reg("\\\"([0-9]+\\.{0,1}[0-9]*)\\\"");
-    return std::regex_replace(ss.str(), reg, "$1");
+	return std::regex_replace(ss.str(), reg, "$1");
 
 }
 
@@ -141,8 +147,21 @@ private:
 
 class message_header {
 public:
+	message_header() {}
+	message_header(uint64_t id) :
+			_id(id) {
+	}
+	message_header(uint64_t id, uint16_t part, uint16_t of) :
+			_id(id), _part_number(part), _parts_total(of) {
+	}
+	message_header(uint64_t id, uint16_t part, uint16_t of, uint32_t ttl) :
+			_id(id), _part_number(part), _parts_total(of), _ttl(ttl) {
+	}
 	void content_length(size_t len) {
 		_content_length = len;
+	}
+	void id(uint64_t id) {
+		_id = id;
 	}
 	uint64_t id() {
 		return _id;
@@ -161,71 +180,87 @@ public:
 		return hqn::proto::timestamp_now() >= timestamp() + ttl();
 	}
 
-	std::string json() {
-		boost::property_tree::ptree oroot;
-		oroot.put<uint64_t>("_id", _id);
-		oroot.put<uint64_t>("_timestamp", _timestamp);
-		oroot.put<uint16_t>("_part_number", _part_number);
-		oroot.put<uint16_t>("_parts_total", _parts_total);
-		oroot.put<uint8_t>("_content_type", _content_type);
-		oroot.put<size_t>("_content_length", _content_length);
-		oroot.put<uint32_t>("_ttl", _ttl);
-		std::stringstream ss;
-		boost::property_tree::write_json(ss, oroot);
-		return hqn::proto::clean_json(ss);
+	uint16_t part_number() {
+		return _part_number;
+	}
+
+	uint16_t parts_total() {
+		return _parts_total;
+	}
+
+	uint8_t content_type() {
+		return _content_type;
+	}
+
+	void content_type(uint8_t ct) {
+		_content_type = ct;
 	}
 
 private:
 	uint64_t _id = 0; // sequence generated
 	uint64_t _timestamp = hqn::proto::timestamp_now(); // ts when created
-	uint16_t _part_number =0; // current part (zero-started)
-	uint16_t _parts_total =0; // total parts (ie 0 from 1)
-	content_type _content_type = content_type::text_json;
+	uint16_t _part_number = 0; // current part (zero-started)
+	uint16_t _parts_total = 1; // total parts (ie 0 from 1)
+	uint8_t _content_type = content_type::text_json;
 	size_t _content_length = 0;
 	uint32_t _ttl = 3600; // seconds, 60-86400 def
 };
 
 class message {
 private:
-	message_header _duty_part;
+	message_header _m_header;
 	std::vector<header> _custom_headers;
 	std::vector<char> _payload; // do not use it directly!!!
 
 public:
-	message() {
-	}
 	message(message_header &mh, const void *content, size_t len) {
-		duty(mh);
+		set_header(mh);
 		payload(content, len);
 	}
-	void duty(message_header &mh) {
-		_duty_part = mh;
+	void set_header(message_header &mh) {
+		_m_header = mh;
 	}
 	void payload(const void *content, size_t len) {
 		_payload.clear();
 		_payload.resize(len);
-		_duty_part.content_length(len);
+		_m_header.content_length(len);
 		std::memcpy(_payload.data(), content, len);
 	}
 	bool expired() {
-		return _duty_part.expired();
+		return _m_header.expired();
 	}
 	uint64_t id() {
-		return _duty_part.id();
+		return _m_header.id();
 	}
 	uint64_t timestamp() {
-		return _duty_part.timestamp();
+		return _m_header.timestamp();
 	}
 
 	std::string json() {
 		boost::property_tree::ptree oroot;
-		oroot.put("_duty_part", _duty_part.json());
-/*TODO base64 array
-		boost::property_tree::ptree payload_node;
-		for (auto &pl : _payload)
-			payload_node.add(pl);
-		oroot.add_child("_payload", payload_node);
-*/
+		boost::property_tree::ptree duty_node;
+		duty_node.put<uint64_t>("_id", _m_header.id());
+		duty_node.put<uint64_t>("_timestamp", _m_header.timestamp());
+		duty_node.put<uint16_t>("_part_number", _m_header.part_number());
+		duty_node.put<uint16_t>("_parts_total", _m_header.parts_total());
+		duty_node.put<uint8_t>("_content_type", _m_header.content_type());
+		duty_node.put<size_t>("_content_length", _m_header.content_length());
+		duty_node.put<uint32_t>("_ttl", _m_header.ttl());
+
+		oroot.add_child("_m_header", duty_node);
+
+		// base64 from byte array
+		std::stringstream os;
+		typedef boost::archive::iterators::insert_linebreaks< // insert line breaks every 72 characters
+				boost::archive::iterators::base64_from_binary< // convert binary values to base64 characters
+						boost::archive::iterators::transform_width< // retrieve 6 bit integers from a sequence of 8 bit bytes
+								const char*, 6, 8> >, 72> base64_text; // compose all the above operations in to a new iterator
+
+		std::copy(base64_text(_payload.data()),
+				base64_text(_payload.data() + _m_header.content_length()),
+				boost::archive::iterators::ostream_iterator<char>(os));
+		oroot.put("_payload", os.str());
+
 		std::stringstream ss;
 		boost::property_tree::write_json(ss, oroot);
 		std::string r = hqn::proto::clean_json(ss);
@@ -366,13 +401,13 @@ private:
 class sequence: public serializable {
 public:
 	sequence(const std::string name) :
-			_name((char*)name.c_str()), _value(0), _increment(1) {
+			_name((char*) name.c_str()), _value(0), _increment(1) {
 	}
 	sequence(const std::string name, uint64_t start, uint64_t inc) :
-			_name((char*)name.c_str()), _value(start), _increment(inc) {
+			_name((char*) name.c_str()), _value(start), _increment(inc) {
 	}
 	sequence(const std::string name, uint64_t inc) :
-			_name((char*)name.c_str()), _value(0), _increment(inc) {
+			_name((char*) name.c_str()), _value(0), _increment(inc) {
 	}
 	virtual size_t serialize_size() const {
 		return serializablePOD<char*>::serialize_size(_name)

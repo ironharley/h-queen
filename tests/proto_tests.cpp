@@ -70,9 +70,10 @@ BOOST_AUTO_TEST_CASE(sequence_test_10_15, * utf::label("sq1015")) {
 	BOOST_CHECK_EQUAL(seq1015.get(), 85);
 }
 BOOST_AUTO_TEST_CASE(m_json, * utf::label("m_json_1")) {
-	hqn::proto::message_header md;
+	hqn::proto::sequence seq("test-sec", 10, 15);
+	hqn::proto::message_header mhdr(seq.inc());
 	std::string test_payload("{will see it}");
-	hqn::proto::message m(md, test_payload.c_str(), test_payload.size());
-	BOOST_CHECK_EQUAL(m.json().length(), 85);
+	hqn::proto::message m(mhdr, test_payload.c_str(), test_payload.size());
+	BOOST_CHECK_EQUAL(m.json().length(), 254);
 }
 BOOST_AUTO_TEST_SUITE_END();
