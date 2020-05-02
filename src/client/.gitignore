@@ -1,2 +1,5 @@
 /Makefile.in
 /hqn-cli
+/client.lo
+/libhqn-client.la
+/.libs/

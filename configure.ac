@@ -1,6 +1,9 @@
 AC_INIT([hqn], [1.0])
-AM_INIT_AUTOMAKE([-Wall -Werror foreign subdir-objects])
+AM_PROG_LIBTOOL
+AM_PROG_AR
 AC_PROG_CXX
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
+AC_ENABLE_SHARED
 AC_CANONICAL_HOST
 # OS name, version and so on 
 OSVER=`uname -r | tr '()/' " " | cut -f1 -d-`.0.0.0

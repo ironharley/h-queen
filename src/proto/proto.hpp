@@ -7,7 +7,7 @@
 
 #ifndef SRC_PROTO_PROTO_HPP_
 #define SRC_PROTO_PROTO_HPP_
-
+#include <regex>
 #include "constants.hpp"
 
 #include <openssl/pem.h>
@@ -21,6 +21,8 @@
 #include <boost/crc.hpp>      // for boost::crc_basic, boost::crc_optimal
 
 #include <boost/date_time/local_time/local_time.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 
 namespace hqn {
 namespace proto {
@@ -54,6 +56,12 @@ static void show_help(bool server) {
 static void show_version() {
 	std::cout << hqn::proto::COPYRIGHT << std::endl;
 	std::cout << PACKAGE_STRING << std::endl;
+}
+
+static std::string clean_json(std::stringstream &ss) {
+	std::regex reg("\\\"([0-9]+\\.{0,1}[0-9]*)\\\"");
+    return std::regex_replace(ss.str(), reg, "$1");
+
 }
 
 enum receipt_code : uint8_t {
@@ -152,13 +160,28 @@ public:
 	bool expired() {
 		return hqn::proto::timestamp_now() >= timestamp() + ttl();
 	}
+
+	std::string json() {
+		boost::property_tree::ptree oroot;
+		oroot.put<uint64_t>("_id", _id);
+		oroot.put<uint64_t>("_timestamp", _timestamp);
+		oroot.put<uint16_t>("_part_number", _part_number);
+		oroot.put<uint16_t>("_parts_total", _parts_total);
+		oroot.put<uint8_t>("_content_type", _content_type);
+		oroot.put<size_t>("_content_length", _content_length);
+		oroot.put<uint32_t>("_ttl", _ttl);
+		std::stringstream ss;
+		boost::property_tree::write_json(ss, oroot);
+		return hqn::proto::clean_json(ss);
+	}
+
 private:
-	uint64_t _id; // sequence generated
+	uint64_t _id = 0; // sequence generated
 	uint64_t _timestamp = hqn::proto::timestamp_now(); // ts when created
-	uint16_t _part_number; // current part (zero-started)
-	uint16_t _parts_total; // total parts (ie 0 from 1)
-	content_type _content_type;
-	size_t _content_length;
+	uint16_t _part_number =0; // current part (zero-started)
+	uint16_t _parts_total =0; // total parts (ie 0 from 1)
+	content_type _content_type = content_type::text_json;
+	size_t _content_length = 0;
 	uint32_t _ttl = 3600; // seconds, 60-86400 def
 };
 
@@ -192,6 +215,22 @@ public:
 	}
 	uint64_t timestamp() {
 		return _duty_part.timestamp();
+	}
+
+	std::string json() {
+		boost::property_tree::ptree oroot;
+		oroot.put("_duty_part", _duty_part.json());
+/*TODO base64 array
+		boost::property_tree::ptree payload_node;
+		for (auto &pl : _payload)
+			payload_node.add(pl);
+		oroot.add_child("_payload", payload_node);
+*/
+		std::stringstream ss;
+		boost::property_tree::write_json(ss, oroot);
+		std::string r = hqn::proto::clean_json(ss);
+		std::cout << r << std::endl;
+		return r;
 	}
 
 };

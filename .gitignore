@@ -35,3 +35,4 @@ Makefile
 /.project
 /Makefile.in
 /config.guess
+/ar-lib
