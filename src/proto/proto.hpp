@@ -286,8 +286,6 @@ const char* serializablePOD<char*>::deserialize(const char *source,
 
 class envelope: public serializable {
 	virtual size_t serialize_size() const {
-		return 0;
-
 		return serializablePOD<unsigned int>::serialize_size(_sign)
 				+ serializablePOD<unsigned long int>::serialize_size(_length)
 				+ serializablePOD<char*>::serialize_size(_header)
@@ -297,7 +295,6 @@ class envelope: public serializable {
 	}
 
 	virtual void serialize(char *out) const {
-
 		out = serializablePOD<int>::serialize(out, _sign);
 		out = serializablePOD<unsigned long int>::serialize(out, _length);
 		out = serializablePOD<char*>::serialize(out, _header);
@@ -306,7 +303,6 @@ class envelope: public serializable {
 
 	}
 	virtual void deserialize(const char *in) {
-
 		in = serializablePOD<int>::deserialize(in, _sign);
 		in = serializablePOD<unsigned long int>::deserialize(in, _length);
 		in = serializablePOD<char*>::deserialize(in, _header);
@@ -328,6 +324,46 @@ private:
 	int _crc32;  // from _sign till end of _body
 };
 
+class sequence: public serializable {
+public:
+	sequence(const std::string name) :
+			_name((char*)name.c_str()), _value(0), _increment(1) {
+	}
+	sequence(const std::string name, uint64_t start, uint64_t inc) :
+			_name((char*)name.c_str()), _value(start), _increment(inc) {
+	}
+	sequence(const std::string name, uint64_t inc) :
+			_name((char*)name.c_str()), _value(0), _increment(inc) {
+	}
+	virtual size_t serialize_size() const {
+		return serializablePOD<char*>::serialize_size(_name)
+				+ serializablePOD<unsigned long int>::serialize_size(_value)
+				+ serializablePOD<unsigned long int>::serialize_size(_increment);
+
+	}
+	virtual void serialize(char *out) const {
+		out = serializablePOD<char*>::serialize(out, _name);
+		out = serializablePOD<unsigned long int>::serialize(out, _value);
+		out = serializablePOD<unsigned long int>::serialize(out, _increment);
+
+	}
+	virtual void deserialize(const char *in) {
+		in = serializablePOD<char*>::deserialize(in, _name);
+		in = serializablePOD<unsigned long int>::deserialize(in, _value);
+		in = serializablePOD<unsigned long int>::deserialize(in, _increment);
+
+	}
+	uint64_t inc() {
+		return (_value += _increment);
+	}
+	uint64_t get() {
+		return _value;
+	}
+private:
+	char *_name;
+	unsigned long int _value;
+	unsigned long int _increment;
+};
 class proto {
 public:
 
