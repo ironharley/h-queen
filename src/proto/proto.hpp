@@ -353,6 +353,9 @@ public:
 		in = serializablePOD<unsigned long int>::deserialize(in, _increment);
 
 	}
+	uint64_t shift(uint64_t off) {
+		return (_value += off);
+	}
 	uint64_t inc() {
 		return (_value += _increment);
 	}
