@@ -195,14 +195,13 @@ int main(int argc, char *argv[]) {
 			using namespace std;
 			hqn::config::config cfg(conf_file);
 			if (cfg.valid()) {
-				BOOST_LOG_TRIVIAL(info)
-				<< "config: " << conf_file.c_str();
 				hqn::db::db sqlite(cfg.get_server_prefs());
-
-				boost::asio::io_service io_service;
-				hqn::server::server s(io_service, cfg.port());
-				io_service.run();
-				res = 0;
+				if (sqlite.valid()) {
+					boost::asio::io_service io_service;
+					hqn::server::server s(io_service, cfg.port());
+					io_service.run();
+					res = 0;
+				}
 			}
 		}
 	} catch (std::exception &e) {

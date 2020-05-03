@@ -45,6 +45,11 @@ public:
 		std::string user;
 		std::string alias = "harlequeen";
 		std::string log_parent = "/var/log";
+		std::string log_file_mask = "server_%3N.log";
+		uint16_t log_file_mb_rotation_size = 1;
+		uint16_t log_file_mb_max_size = 5;
+		uint32_t log_file_mb=1048576;
+		std::string log_file_format = "[%TimeStamp%][%Severity%]:  %Message%";
 		std::string engine_parent = "/var/lib";
 
 	};
@@ -58,9 +63,19 @@ public:
 		__server.user = pt.get<std::string>("server.user");
 		__server.alias = pt.get<std::string>("server.alias");
 		__server.log_parent = pt.get<std::string>("server.log_parent");
+		__server.log_file_format = pt.get<std::string>("server.log_file_format");
+		__server.log_file_mask = pt.get<std::string>("server.log_file_mask");
+		__server.log_file_mb_rotation_size = pt.get<uint16_t>(
+				"server.log_file_mb_rotation_size");
+		__server.log_file_mb_max_size = pt.get<uint16_t>(
+				"server.log_file_mb_max_size");
+		__server.log_file_mb = pt.get<uint32_t>(
+						"server.log_file_mb");
 		__server.engine_parent = pt.get<std::string>("server.engine_parent");
 
 		hqn::config::config::init_log();
+		BOOST_LOG_TRIVIAL(info)
+		<< "config: " << __file;
 
 		std::string cuser = env::current_user();
 		_valid = !__server.user.compare(cuser);
@@ -87,26 +102,26 @@ private:
 	bool _valid;
 
 	void init_log() {
-		static const std::string COMMON_FMT(
-				"[%TimeStamp%][%Severity%]:  %Message%");
 
 		boost::log::register_simple_formatter_factory<
 				boost::log::trivial::severity_level, char>("Severity");
-
+#ifdef _DEBUG
 		// Output message to console
 		boost::log::add_console_log(std::cout, boost::log::keywords::format =
-				COMMON_FMT, boost::log::keywords::auto_flush = true);
+				__server.log_file_format, boost::log::keywords::auto_flush = true);
+#endif
 
-		// Output message to file, rotates when file reached 1mb or at midnight every day. Each log file
-		// is capped at 1mb and total is 20mb
 		boost::log::add_file_log(
 				boost::log::keywords::file_name = __server.log_parent.append(
-						"/").append(__server.alias).append("/server_%3N.log"),
-				boost::log::keywords::rotation_size = 1 * 1024 * 1024,
-				boost::log::keywords::max_size = 20 * 1024 * 1024,
+						"/").append(__server.alias).append("/").append(
+						__server.log_file_mask),
+				boost::log::keywords::rotation_size =
+						__server.log_file_mb_rotation_size * __server.log_file_mb,
+				boost::log::keywords::max_size = __server.log_file_mb_max_size
+						* __server.log_file_mb,
 				boost::log::keywords::time_based_rotation =
 						boost::log::sinks::file::rotation_at_time_point(0, 0,
-								0), boost::log::keywords::format = COMMON_FMT,
+								0), boost::log::keywords::format = __server.log_file_format,
 				boost::log::keywords::auto_flush = true);
 
 		boost::log::add_common_attributes();
