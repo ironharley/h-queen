@@ -87,10 +87,13 @@ AC_CHECK_HEADER([boost/crc.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([openssl/pem.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
 AC_CHECK_HEADER([openssl/x509.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
 AC_CHECK_HEADER([openssl/x509v3.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
+AC_CHECK_HEADER([sqlite3.h],  [], [AC_MSG_FAILURE(missing sqlite3 header(s))])
+
 AC_LANG_POP([C++])
  
 
 LIBS="-L/usr/local/lib -L/usr/lib  -L/usr/lib64 \   
+    -lsqlite3 \
     -lssl \
     -lcrypto \
     -lpthread \

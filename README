@@ -4,3 +4,37 @@ autoheader
 automake --force-missing --add-missing
 autoconf
 ./configure
+
+
+hqn-prooto
+----------
+
+enum receipt_code : uint8_t {
+	ok = 0, to_address_invalid, to_address_rejected, ttl = 255,
+};
+
+enum message_type : uint8_t {
+	cmd = 0, msg = 1, rcpt = 255,
+};
+
+enum content_type : uint8_t {
+	native = 0, text_plain, text_json, text_xml, protobuf,
+};
+
+enum header_type : uint8_t {
+	string, integer,
+};
+
+message:
+{
+    "_m_header": {
+        "_id": 25,
+        "_timestamp": 1588413845, // epoch seconds
+        "_part_number": 0,
+        "_parts_total": 1,
+        "_content_type": 2, // 2 = json
+        "_content_length": 13, // unbased64
+        "_ttl": 3600 // default, sec
+    },
+    "_payload": "e3dpbGwgc2VlIGl0fQ" // base64
+}

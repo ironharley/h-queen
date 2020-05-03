@@ -17,7 +17,7 @@
 #include <boost/asio/ssl.hpp>
 
 #include "../proto/proto.hpp"
-#include "../server/config.hpp"
+#include "../server/db.hpp"
 
 typedef boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket;
 namespace hqn {
@@ -168,7 +168,6 @@ private:
 int main(int argc, char *argv[]) {
 	int res = 1;
 	try {
-		hqn::config::init_log();
 
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
@@ -193,16 +192,15 @@ int main(int argc, char *argv[]) {
 						boost::any_cast<std::string>(vm["config"].value()).c_str();
 			}
 
-			boost::asio::io_service io_service;
-
 			using namespace std;
 			hqn::config::config cfg(conf_file);
 			if (cfg.valid()) {
 				BOOST_LOG_TRIVIAL(info)
 				<< "config: " << conf_file.c_str();
+				hqn::db::db sqlite(cfg.get_server_prefs());
 
+				boost::asio::io_service io_service;
 				hqn::server::server s(io_service, cfg.port());
-
 				io_service.run();
 				res = 0;
 			}
