@@ -1,8 +1,8 @@
 AC_INIT([hqn], [1.0])
-AM_PROG_LIBTOOL
 AM_PROG_AR
-AC_PROG_CXX
+AM_PROG_LIBTOOL
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
+AC_PROG_CXX
 AC_ENABLE_SHARED
 AC_CANONICAL_HOST
 # OS name, version and so on 
@@ -61,9 +61,7 @@ esac
 OSTYPE_UPPER=`echo $OSTYPE | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
 ARCH_UPPER=`echo $host_cpu | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
 LARCH_UPPER=`echo $LARCH | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
-ARCH_CPPFLAGS="-DHQMQ_OSTYPE_${OSTYPE_UPPER} -DHQMQ_ARCH_${ARCH_UPPER} -DHQMQ_LARCH_${LARCH_UPPER}"
-
-#AC_C_BIGENDIAN([AC_DEFINE_UNQUOTED(RESIP_BIG_ENDIAN, , RESIP_BIG_ENDIAN)])
+ARCH_CPPFLAGS="-DHQN_OSTYPE_${OSTYPE_UPPER} -DHQN_ARCH_${ARCH_UPPER} -DHQN_LARCH_${LARCH_UPPER}"
 
 CXXFLAGS="-g -O3 -std=c++14 ${ARCH_CPPFLAGS} -DBOOST_LOG_DYN_LINK -Wall -Wno-deprecated -Wnonnull -Wuninitialized -Wunused-function -fpermissive "
 

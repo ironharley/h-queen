@@ -196,11 +196,16 @@ int main(int argc, char *argv[]) {
 			hqn::config::config cfg(conf_file);
 			if (cfg.valid()) {
 				hqn::db::db sqlite(cfg.get_server_prefs());
+				sqlite.init();
 				if (sqlite.valid()) {
 					boost::asio::io_service io_service;
 					hqn::server::server s(io_service, cfg.port());
 					io_service.run();
 					res = 0;
+				} else {
+					BOOST_LOG_TRIVIAL(warning)
+					<< "db fail ";
+
 				}
 			}
 		}

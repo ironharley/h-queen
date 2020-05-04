@@ -44,12 +44,11 @@ public:
 	~db() {
 		this->close();
 	}
-	void init() {
+	bool init() {
 		this->close();
 		if (!(_valid = sqlite3_open(_file_preparatore.c_str(), &_wh)
 				== SQLITE_OK)) {
-			std::cerr << "Can't open database: " << sqlite3_errmsg(_wh)
-					<< std::endl;
+			BOOST_LOG_TRIVIAL(warning) << "Can't open database: " << sqlite3_errmsg(_wh)
 			;
 		}
 		int ret = sqlite3_wal_autocheckpoint(_wh, 1024);
@@ -61,8 +60,6 @@ public:
 		//
 		if (ret != SQLITE_OK) {
 			//todo add check in errmsg 'no such table: main.init' here
-			std::cerr << "Initial check request: " << std::to_string(ret)
-					<< " - " << zErrMsg << std::endl;
 
 			BOOST_LOG_TRIVIAL(warning)
 			<< "Database: new, initialization ...";
@@ -106,6 +103,7 @@ public:
 			<< "Database initialization ok";
 
 		}
+		return valid();
 	}
 
 	bool opened() {
@@ -122,8 +120,19 @@ public:
 	bool valid() {
 		return this->opened() && _valid;
 	}
+
+	sqlite3 *wh() {
+		return _wh;;
+	}
 }
 ;
+class mbox {
+	hqn::db::db _db;
+public:
+	mbox(const hqn::db::db &db) : _db (db) {
+
+	}
+};
 }
 }
 

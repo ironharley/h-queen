@@ -18,6 +18,7 @@
 #include "boost/log/trivial.hpp"
 #include "boost/log/utility/setup.hpp"
 #include <boost/log/expressions.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include <iostream>
 #include <exception>
@@ -25,6 +26,24 @@
 
 namespace hqn {
 namespace config {
+
+class mbox {
+	boost::uuids::uuid _owner;
+	uint8_t _box_type = NO_PERSISTENT;
+	uint32_t _ttl = 0;
+
+public:
+
+	bool persistent() {
+		return _box_type > NO_PERSISTENT;
+	}
+
+	static const uint8_t NO_PERSISTENT = 0;
+	static const uint8_t RECEIPTS_ONLY = NO_PERSISTENT | 1;
+	static const uint8_t FULL_PERSISTENT = NO_PERSISTENT | 2;
+	static const uint32_t FULL_PERSISTENT_TTL_DEFAULT = 86400;
+};
+
 class env {
 public:
 	static std::string current_user() {
@@ -38,6 +57,7 @@ public:
 		return {};
 	}
 };
+
 class config {
 public:
 	struct server {
@@ -48,7 +68,7 @@ public:
 		std::string log_file_mask = "server_%3N.log";
 		uint16_t log_file_mb_rotation_size = 1;
 		uint16_t log_file_mb_max_size = 5;
-		uint32_t log_file_mb=1048576;
+		uint32_t log_file_mb = 1048576;
 		std::string log_file_format = "[%TimeStamp%][%Severity%]:  %Message%";
 		std::string engine_parent = "/var/lib";
 
@@ -63,14 +83,14 @@ public:
 		__server.user = pt.get<std::string>("server.user");
 		__server.alias = pt.get<std::string>("server.alias");
 		__server.log_parent = pt.get<std::string>("server.log_parent");
-		__server.log_file_format = pt.get<std::string>("server.log_file_format");
+		__server.log_file_format = pt.get<std::string>(
+				"server.log_file_format");
 		__server.log_file_mask = pt.get<std::string>("server.log_file_mask");
 		__server.log_file_mb_rotation_size = pt.get<uint16_t>(
 				"server.log_file_mb_rotation_size");
 		__server.log_file_mb_max_size = pt.get<uint16_t>(
 				"server.log_file_mb_max_size");
-		__server.log_file_mb = pt.get<uint32_t>(
-						"server.log_file_mb");
+		__server.log_file_mb = pt.get<uint32_t>("server.log_file_mb");
 		__server.engine_parent = pt.get<std::string>("server.engine_parent");
 
 		hqn::config::config::init_log();
@@ -116,12 +136,15 @@ private:
 						"/").append(__server.alias).append("/").append(
 						__server.log_file_mask),
 				boost::log::keywords::rotation_size =
-						__server.log_file_mb_rotation_size * __server.log_file_mb,
+						__server.log_file_mb_rotation_size
+								* __server.log_file_mb,
 				boost::log::keywords::max_size = __server.log_file_mb_max_size
 						* __server.log_file_mb,
 				boost::log::keywords::time_based_rotation =
 						boost::log::sinks::file::rotation_at_time_point(0, 0,
-								0), boost::log::keywords::format = __server.log_file_format,
+								0),
+				boost::log::keywords::format = __server.log_file_format,
+				boost::log::keywords::open_mode = std::ios_base::app,
 				boost::log::keywords::auto_flush = true);
 
 		boost::log::add_common_attributes();
