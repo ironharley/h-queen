@@ -16,7 +16,7 @@
 #include <boost/program_options.hpp>
 #include <boost/program_options/options_description.hpp>
 
-#include "client.cpp"
+#include "../client/hqn-client.h"
 
 int main(int argc, char *argv[]) {
 	try {
@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 				hqn::proto::show_version();
 
 			} else if (vm.size() == 2) {
-				hqn::client::wrap w(
+				wrap w(
 						boost::any_cast<std::string>(vm["host"].value()).c_str(),
 						boost::any_cast<std::string>(vm["port"].value()).c_str());
 			}
