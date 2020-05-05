@@ -107,7 +107,7 @@ File: hqn.info,  Node: Requirements,  Next: Build from src,  Up: Installation
 ===========================
 
   1. Common:
-       1. gcc/g++ && libs,
+       1. gcc/g++ version 7+ (-std=c++17 required) && libs,
        2. libtools,
        3. automake,
        4. openssl
@@ -275,14 +275,14 @@ Node: Technical description2058
 Node: Common2282
 Node: Installation2366
 Node: Requirements2907
-Node: Build from src3231
-Node: Properley installation3382
-Node: Postinstall3597
-Node: Configuration6654
-Node: Core6917
-Node: Store7001
-Node: Client access7087
-Node: Index8298
+Node: Build from src3264
+Node: Properley installation3415
+Node: Postinstall3630
+Node: Configuration6687
+Node: Core6950
+Node: Store7034
+Node: Client access7120
+Node: Index8331
 
 End Tag Table
 

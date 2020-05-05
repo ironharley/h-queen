@@ -3,3 +3,4 @@
 /client.lo
 /libhqn-client.la
 /.libs/
+/hqn-client.lo
