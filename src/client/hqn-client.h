@@ -10,6 +10,7 @@
 
 #include <cstdlib>
 #include <iostream>
+#include <filesystem>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
@@ -18,6 +19,7 @@
 
 #include "../proto/proto.hpp"
 
+namespace hqn {
 enum {
 	max_length = 1024
 };
@@ -55,11 +57,12 @@ private:
 	bool client_cert_verification(bool preverified,
 			boost::asio::ssl::verify_context &ctx);
 
+	std::string _home;
 };
 
 extern "C" {
 wrap * create(const char *host, const char *port) {
     return new wrap(host, port);
 }
-}
+}}
 #endif /* SRC_CLIENT_HQN_CLIENT_H_ */

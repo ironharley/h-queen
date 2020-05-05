@@ -5,7 +5,7 @@
  *      Author: hkooper
  */
 #include <hqn-client.h>
-
+namespace hqn {
 client::client(boost::asio::io_service &io_service,
 		boost::asio::ssl::context &context,
 		boost::asio::ip::tcp::resolver::iterator endpoint_iterator) :
@@ -41,10 +41,7 @@ void client::handle_connect(const boost::system::error_code &error,
 
 void client::handle_handshake(const boost::system::error_code &error) {
 	if (!error) {
-		std::cout << "Enter message: ";
-		std::cin.getline(request_, max_length);
 		size_t request_length = strlen(request_);
-
 		boost::asio::async_write(socket_,
 				boost::asio::buffer(request_, request_length),
 				boost::bind(&client::handle_write, this,
@@ -71,15 +68,20 @@ void client::handle_write(const boost::system::error_code &error,
 void client::handle_read(const boost::system::error_code &error,
 		size_t bytes_transferred) {
 	if (!error) {
+/*
 		std::cout << "Reply: ";
 		std::cout.write(reply_, bytes_transferred);
 		std::cout << "\n";
+*/
 	} else {
 		std::cout << "Read failed: " << error.message() << "\n";
 	}
 }
 
 wrap::wrap(const char *host, const char *port) {
+	_home = std::getenv("HOME");
+	_home = _home.append("/").append(".hqn");
+	std::filesystem::create_directory(_home);
 	boost::asio::io_service io_service;
 
 	boost::asio::ip::tcp::resolver resolver(io_service);
@@ -100,10 +102,14 @@ wrap::wrap(const char *host, const char *port) {
 	context_.set_verify_mode(
 			boost::asio::ssl::context::verify_peer
 					| boost::asio::ssl::context::verify_fail_if_no_peer_cert);
-	context_.load_verify_file("etc/ssl/device.pem");
 
-	context_.use_certificate_chain_file("etc/ssl/client.pem");
-	context_.use_private_key_file("etc/ssl/client.key",
+	std::string lvf = _home;
+	context_.load_verify_file(lvf.append("/ssl/device.pem"));
+
+	std::string uccf = _home;
+	context_.use_certificate_chain_file(uccf.append("/ssl/client.pem"));
+	std::string pkf = _home;
+	context_.use_private_key_file(pkf.append("/ssl/client.key"),
 			boost::asio::ssl::context::pem);
 
 	client c(io_service, context_, iterator);
@@ -119,11 +125,14 @@ bool wrap::client_cert_verification(bool preverified,
 	X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
 	X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
 	int ver = hqn::proto::proto::cert_verify(cert);
+/*
 	if (ver == -1) {
 		std::cout << "NOT Verified " << std::endl;
 	} else {
 		std::cout << "Verifying " << std::to_string(ver) << "\n";
 	}
+*/
 	return ver == 1;
+}
 }
 

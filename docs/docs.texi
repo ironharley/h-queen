@@ -147,7 +147,7 @@ If someone does not like it -  ure welcome.
 Common: 
 	@enumerate
 	@item
-		gcc/g++ && libs, 
+		gcc/g++ version 7+ (-std=c++17 required) && libs, 
 	@item
 		libtools, 
 	@item

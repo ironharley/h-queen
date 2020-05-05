@@ -5,6 +5,7 @@ AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 AC_PROG_CXX
 AC_ENABLE_SHARED
 AC_CANONICAL_HOST
+AX_CXX_COMPILE_STDCXX_17([noext], [mandatory])
 # OS name, version and so on 
 OSVER=`uname -r | tr '()/' " " | cut -f1 -d-`.0.0.0
 OS_MAJOR_VER=`echo $OSVER | cut -f1 -d.`
@@ -63,9 +64,15 @@ ARCH_UPPER=`echo $host_cpu | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQ
 LARCH_UPPER=`echo $LARCH | sed 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'`
 ARCH_CPPFLAGS="-DHQN_OSTYPE_${OSTYPE_UPPER} -DHQN_ARCH_${ARCH_UPPER} -DHQN_LARCH_${LARCH_UPPER}"
 
-CXXFLAGS="-g -O3 -std=c++14 ${ARCH_CPPFLAGS} -DBOOST_LOG_DYN_LINK -Wall -Wno-deprecated -Wnonnull -Wuninitialized -Wunused-function -fpermissive "
+CXXFLAGS="-g -O3 -std=c++17 ${ARCH_CPPFLAGS} -DBOOST_LOG_DYN_LINK -Wall -Wno-deprecated -Wnonnull -Wuninitialized -Wunused-function -fpermissive "
 
 AC_LANG_PUSH([C++])
+AC_CHECK_HEADER([readline/readline.h],  [], [AC_MSG_FAILURE(missing readline header)])
+
+AC_CHECK_HEADER([openssl/pem.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
+AC_CHECK_HEADER([openssl/x509.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
+AC_CHECK_HEADER([openssl/x509v3.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
+
 AC_CHECK_HEADER([boost/asio.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([boost/bind.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([boost/uuid/uuid.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
@@ -82,9 +89,6 @@ AC_CHECK_HEADER([boost/archive/iterators/ostream_iterator.hpp], [], [AC_MSG_ERRO
 AC_CHECK_HEADER([boost/test/unit_test.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 AC_CHECK_HEADER([boost/crc.hpp], [], [AC_MSG_ERROR(missing boost header(s))])
 
-AC_CHECK_HEADER([openssl/pem.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
-AC_CHECK_HEADER([openssl/x509.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
-AC_CHECK_HEADER([openssl/x509v3.h],  [], [AC_MSG_FAILURE(missing openssl header(s))])
 AC_CHECK_HEADER([sqlite3.h],  [], [AC_MSG_FAILURE(missing sqlite3 header(s))])
 
 AC_LANG_POP([C++])
