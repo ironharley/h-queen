@@ -1,5 +1,5 @@
 //
-// server.cpp
+// hqn-server.cpp
 // ~~~~~~~~~~
 //
 // Copyright (c) 2003-2010 Christopher M. Kohlhoff (chris at kohlhoff dot com)
@@ -168,7 +168,6 @@ private:
 int main(int argc, char *argv[]) {
 	int res = 1;
 	try {
-
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
 		desc.add_options()("help", "")("version", "")("config",
@@ -180,10 +179,10 @@ int main(int argc, char *argv[]) {
 		po::notify(vm);
 
 		if (vm.count("help") > 0) {
-			hqn::proto::show_help(true);
+			hqn::config::show_help(true);
 
 		} else if (vm.count("version") > 0) {
-			hqn::proto::show_version();
+			hqn::config::show_version();
 
 		} else {
 			std::string conf_file = "/etc/harlequeen/harlequeen.cfg";

@@ -10,7 +10,7 @@ hqn::proto::content_type ct;
 BOOST_AUTO_TEST_SUITE(Hqn_proto_sute_1)
 ;
 BOOST_AUTO_TEST_CASE(case_1, * utf::label("c1")) {
-	BOOST_CHECK(hqn::proto::timestamp_now() > 0);
+	BOOST_CHECK(hqn::config::timestamp_now() > 0);
 }
 BOOST_AUTO_TEST_CASE(case_2, * utf::label("c2")) {
 	BOOST_CHECK_EQUAL(sizeof(char), sizeof(uint8_t));
@@ -20,10 +20,10 @@ BOOST_AUTO_TEST_CASE(case_2, * utf::label("c2")) {
 
 BOOST_AUTO_TEST_CASE(message_test, * utf::label("mt")) {
 	hqn::proto::address from("somefrom@email.org",
-			hqn::proto::uuid("test1.harle.queen"));
+			hqn::config::uuid("test1.harle.queen"));
 	BOOST_CHECK_MESSAGE(sizeof(char) != sizeof(uint8_t), from.str());
 	hqn::proto::address to("someto@email.org",
-			hqn::proto::uuid("test2.harle.queen"));
+			hqn::config::uuid("test2.harle.queen"));
 	BOOST_CHECK_MESSAGE(sizeof(char) != sizeof(uint8_t), to.str());
 	hqn::proto::subsription sub("subscr1", to);
 	BOOST_CHECK_MESSAGE(sizeof(char) != sizeof(uint8_t), sub.str());

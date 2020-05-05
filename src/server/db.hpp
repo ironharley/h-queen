@@ -25,14 +25,6 @@ class db {
 		return 0;
 	}
 
-	static uint64_t timestamp_now() {
-		boost::posix_time::ptime time_t_epoch(
-				boost::gregorian::date(1970, 1, 1));
-		boost::posix_time::ptime now =
-				boost::posix_time::second_clock::local_time();
-		boost::posix_time::time_duration diff = now - time_t_epoch;
-		return diff.total_seconds();
-	}
 
 public:
 	db(const hqn::config::config::server &svc_cfg) :
@@ -71,7 +63,7 @@ public:
 			std::string insert =
 					"INSERT INTO main.init(creation, c_version) VALUES(";
 			const char *ins =
-					insert.append(std::to_string(hqn::db::db::timestamp_now())).append(
+					insert.append(std::to_string(hqn::config::timestamp_now())).append(
 							", '").append(PACKAGE_VERSION).append("')").c_str();
 
 			ret = sqlite3_exec(_wh, ins, hqn::db::db::callback, nullptr,

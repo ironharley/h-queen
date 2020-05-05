@@ -32,6 +32,7 @@ class mbox {
 	uint8_t _box_type = NO_PERSISTENT;
 	uint32_t _ttl = 0;
 
+
 public:
 
 	bool persistent() {

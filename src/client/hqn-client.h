@@ -24,6 +24,7 @@ enum {
 	max_length = 1024
 };
 
+
 class client {
 public:
 

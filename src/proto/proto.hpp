@@ -1,7 +1,7 @@
 /*
  * proto.hpp
  *
- *  Created on: May 1, 2020
+ * Created on: May 1, 2020
  *      Author: hkooper
  */
 
@@ -14,13 +14,8 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 
-#include <boost/uuid/uuid.hpp>
-#include <boost/uuid/uuid_io.hpp>
-#include <boost/uuid/random_generator.hpp>
-#include <boost/uuid/name_generator.hpp>
 #include <boost/crc.hpp>      // for boost::crc_basic, boost::crc_optimal
 
-#include <boost/date_time/local_time/local_time.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
@@ -32,37 +27,6 @@
 
 namespace hqn {
 namespace proto {
-static const char *COPYRIGHT =
-		"(c)HarleQueen craftsmen @ worldwide and handmade. Since 2020";
-
-static const char *HELP_SERVER_SCREEN =
-		"hqn-server [--config=/etc/harlequeen/harlequeen.cfg | --version | --help]";
-static const char *HELP_CLI_SCREEN = "hqn-cli [--version | --help]";
-
-static uint64_t timestamp_now() {
-	boost::posix_time::ptime time_t_epoch(boost::gregorian::date(1970, 1, 1));
-	boost::posix_time::ptime now =
-			boost::posix_time::second_clock::local_time();
-	boost::posix_time::time_duration diff = now - time_t_epoch;
-	return diff.total_seconds();
-}
-static boost::uuids::uuid uuid(const char *ns_uuid_) {
-	boost::uuids::name_generator_sha1 gen(boost::uuids::ns::dns());
-	return gen(ns_uuid_);
-}
-
-static void show_help(bool server) {
-	std::cout << hqn::proto::COPYRIGHT << std::endl;
-	if (server)
-		std::cout << hqn::proto::HELP_SERVER_SCREEN << std::endl;
-	else
-		std::cout << hqn::proto::HELP_CLI_SCREEN << std::endl;
-}
-
-static void show_version() {
-	std::cout << hqn::proto::COPYRIGHT << std::endl;
-	std::cout << PACKAGE_STRING << std::endl;
-}
 
 static std::string clean_json(std::stringstream &ss) {
 	std::regex reg("\\\"([0-9]+\\.{0,1}[0-9]*)\\\"");
@@ -89,7 +53,7 @@ enum header_type : uint8_t {
 class address {
 public:
 	address(const std::string &cn, const boost::uuids::uuid &server) :
-			_cn(cn), _server(server), _uuid(hqn::proto::uuid(cn.c_str())) {
+			_cn(cn), _server(server), _uuid(hqn::config::uuid(cn.c_str())) {
 	}
 	address(const address &another) :
 			_cn(another._cn), _server(another._server), _uuid(another._uuid) {
@@ -115,7 +79,7 @@ class subsription: public hqn::proto::address {
 public:
 	subsription(const std::string &_sname, const hqn::proto::address &_creator) :
 			hqn::proto::address(_creator) {
-		_uuid = hqn::proto::uuid(_sname.c_str());
+		_uuid = hqn::config::uuid(_sname.c_str());
 	}
 	virtual std::string str() override {
 		std::stringstream scl;
@@ -177,7 +141,7 @@ public:
 	}
 
 	bool expired() {
-		return hqn::proto::timestamp_now() >= timestamp() + ttl();
+		return hqn::config::timestamp_now() >= timestamp() + ttl();
 	}
 
 	uint16_t part_number() {
@@ -198,7 +162,7 @@ public:
 
 private:
 	uint64_t _id = 0; // sequence generated
-	uint64_t _timestamp = hqn::proto::timestamp_now(); // ts when created
+	uint64_t _timestamp = hqn::config::timestamp_now(); // ts when created
 	uint16_t _part_number = 0; // current part (zero-started)
 	uint16_t _parts_total = 1; // total parts (ie 0 from 1)
 	uint8_t _content_type = content_type::text_json;
@@ -291,7 +255,7 @@ public:
 private:
 	uint64_t _message_id; // for message id
 	uint64_t _message_timestamp; // ts of orig message
-	uint64_t _delivery_timestamp = hqn::proto::timestamp_now(); // ts of receipt creation
+	uint64_t _delivery_timestamp = hqn::config::timestamp_now(); // ts of receipt creation
 	receipt_code _code = receipt_code::ok;
 };
 
